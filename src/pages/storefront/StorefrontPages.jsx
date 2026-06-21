@@ -1,0 +1,12 @@
+export { HomePage } from './HomePage.jsx';
+export { CategoriesPage } from './CategoriesPage.jsx';
+export { ShopPage } from './ShopPage.jsx';
+export { ProductDetailPage } from './ProductDetailPage.jsx';
+export { CartPage } from './CartPage.jsx';
+export { CheckoutPage } from './CheckoutPage.jsx';
+export { WishlistPage } from './WishlistPage.jsx';
+export { TrackingPage } from './TrackingPage.jsx';
+export { LoginPage } from './LoginPage.jsx';
+export { AccountPage } from './AccountPage.jsx';
+export { ContactPage } from './ContactPage.jsx';
+export { SimplePage } from './SimplePage.jsx';

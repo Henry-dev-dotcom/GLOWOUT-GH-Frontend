@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,600&family=DM+Serif+Display:ital@0;1&family=Jost:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --border-subtle: rgba(201,169,110,0.12);
+  --border-mid: rgba(201,169,110,0.25);
+  --border-strong: rgba(201,169,110,0.45);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #0D0A0F;
+  color: #F5EFE8;
+  font-family: 'Jost', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #150F1C; }
+::-webkit-scrollbar-thumb { background: #8A6B3A; border-radius: 999px; }
+
+@layer components {
+  .page-wrap { @apply min-h-screen bg-surface-0 text-[#F5EFE8]; }
+  .container-lux { @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8; }
+  .lux-card { @apply rounded-2xl border border-[rgba(201,169,110,.12)] bg-surface-1 shadow-[0_8px_32px_rgba(0,0,0,.45)]; }
+  .lux-card-soft { @apply rounded-2xl border border-[rgba(201,169,110,.12)] bg-surface-2/70; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide transition active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-gold { @apply bg-gold text-ink hover:bg-gold-bright hover:shadow-[0_4px_24px_rgba(201,169,110,.35)]; }
+  .btn-outline { @apply border border-[rgba(201,169,110,.35)] text-gold hover:border-gold hover:bg-gold/10; }
+  .btn-ghost { @apply border border-[rgba(201,169,110,.12)] bg-surface-2 text-[#C8BAD0] hover:border-[rgba(201,169,110,.28)] hover:bg-surface-3 hover:text-white; }
+  .btn-danger { @apply bg-rose-deep text-white hover:bg-rose; }
+  .field { @apply w-full rounded-xl border border-[rgba(201,169,110,.12)] bg-surface-2 px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#564869] focus:border-gold/60 focus:bg-surface-3; }
+  .label { @apply mb-2 block text-xs font-bold uppercase tracking-[.14em] text-[#8A7A98]; }
+  .section-eyebrow { @apply text-xs font-bold uppercase tracking-[.22em] text-gold; }
+  .heading-xl { @apply font-display text-4xl font-bold leading-tight md:text-6xl; }
+  .heading-lg { @apply font-display text-3xl font-bold leading-tight md:text-5xl; }
+  .heading-md { @apply font-display text-2xl font-bold leading-tight md:text-3xl; }
+  .muted { @apply text-[#8A7A98]; }
+  .soft { @apply text-[#C8BAD0]; }
+  .badge { @apply inline-flex items-center rounded-full border border-[rgba(201,169,110,.24)] bg-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-gold; }
+  .admin-table { @apply w-full border-collapse overflow-hidden text-left text-sm; }
+  .admin-table th { @apply border-b border-[rgba(201,169,110,.12)] px-4 py-3 text-xs font-bold uppercase tracking-[.12em] text-[#8A7A98]; }
+  .admin-table td { @apply border-b border-[rgba(201,169,110,.08)] px-4 py-3 text-[#C8BAD0]; }
+  .admin-table tr:hover td { @apply bg-surface-2 text-white; }
+}
+
+.product-image {
+  background-size: cover;
+  background-position: center;
+}
+
+.print-only { display: none; }
+@media print {
+  body { background: white; color: black; }
+  .no-print { display: none !important; }
+  .print-only { display: block; }
+}
+
+@layer utilities {
+  .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+}
+
+@layer components {
+  .focus-ring { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink; }
+  .status-panel { @apply rounded-2xl border p-4 text-sm leading-6; }
+  .mobile-card-grid { @apply grid gap-4 sm:grid-cols-2 xl:grid-cols-3; }
+}
+
+button, a, input, select, textarea { outline-offset: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #C9A96E;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .admin-table {
+    min-width: 760px;
+  }
+  .lux-card:has(.admin-table) {
+    overflow-x: auto;
+  }
+  .heading-xl { font-size: 2.6rem; }
+  .heading-lg { font-size: 2.15rem; }
+  .field { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
