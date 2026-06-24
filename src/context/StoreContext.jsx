@@ -417,6 +417,20 @@ export function StoreProvider({ children }) {
     return { ok: false, message: 'Invalid login details. Use a backend account or demo password glowoutgh123.' };
   }
 
+  async function loginWithGoogle(credential) {
+    if (!credential) return { ok: false, message: 'Google sign-in was cancelled.' };
+    if (!BACKEND_ENABLED) return { ok: false, message: 'Google sign-in requires the backend API to be enabled.' };
+    const backendResult = await apiTask('Verifying Google sign-in', () => authApi.google(credential), { silent: false });
+    if (backendResult?.user && backendResult?.token) {
+      setAuthToken(backendResult.token);
+      const user = backendUserToLocal(backendResult.user);
+      setCurrentUser(user);
+      if (user.type === 'admin') await syncAdminData();
+      return { ok: true, user, source: 'backend' };
+    }
+    return { ok: false, message: 'Google sign-in failed. Make sure you already have an account with this email.' };
+  }
+
   async function registerCustomer(raw) {
     const email = String(raw.email || '').trim().toLowerCase();
     if (!raw.name || !email || !raw.password) return { ok: false, message: 'Name, email and password are required.' };
@@ -466,8 +480,30 @@ export function StoreProvider({ children }) {
   async function requestPasswordReset(email) {
     const normalEmail = String(email || '').trim().toLowerCase();
     if (!normalEmail) return { ok: false, message: 'Enter your email address.' };
+    if (BACKEND_ENABLED) {
+      try {
+        await authApi.requestPasswordReset(normalEmail);
+      } catch {
+        // The backend always returns success to avoid leaking which emails
+        // exist; a thrown error here means a network/server problem, not a
+        // missing account. We still show the same neutral message.
+      }
+      return { ok: true, message: 'If an account exists for that email, a reset link has been sent. Check your inbox.' };
+    }
     setPasswordResetRequests((list) => [{ id: uid('reset'), email: normalEmail, status: 'requested', createdAt: new Date().toISOString() }, ...list]);
-    return { ok: true, message: 'Password reset request saved. Connect email delivery when backend auth is live.' };
+    return { ok: true, message: 'Password reset request saved (local demo mode).' };
+  }
+
+  async function resetPassword(token, newPassword) {
+    if (!token) return { ok: false, message: 'This reset link is missing its token.' };
+    if (!newPassword || newPassword.length < 8) return { ok: false, message: 'New password must be at least 8 characters.' };
+    if (!BACKEND_ENABLED) return { ok: false, message: 'Password reset requires the backend API to be enabled.' };
+    try {
+      await authApi.resetPassword(token, newPassword);
+      return { ok: true, message: 'Password updated. You can now sign in with your new password.' };
+    } catch (error) {
+      return { ok: false, message: error?.message || 'This reset link is invalid or has expired.' };
+    }
   }
 
   function upsertAddress(raw) {
@@ -478,7 +514,15 @@ export function StoreProvider({ children }) {
   }
   function deleteAddress(id) { setSavedAddresses((list) => list.filter((address) => address.id !== id)); }
 
-  function logout() { clearAuthToken(); setCurrentUser(null); }
+  function logout() {
+    if (BACKEND_ENABLED) {
+      // Clears the httpOnly auth cookie server-side. Fire-and-forget; we clear
+      // local state regardless of the network result.
+      apiTask('Signing out', () => authApi.logout(), { silent: true }).catch(() => {});
+    }
+    clearAuthToken();
+    setCurrentUser(null);
+  }
 
   function setSettings(nextSettings) {
     setSettingsLocal(nextSettings);
@@ -528,7 +572,7 @@ export function StoreProvider({ children }) {
     upsertCoupon, deleteCoupon, resetCoupons,
     upsertReturn, deleteReturn,
     upsertCustomer, deleteCustomer,
-    upsertTeamUser, deleteTeamUser, login, registerCustomer, updateCurrentUserProfile, changePassword, requestPasswordReset, upsertAddress, deleteAddress, logout,
+    upsertTeamUser, deleteTeamUser, login, loginWithGoogle, registerCustomer, updateCurrentUserProfile, changePassword, requestPasswordReset, resetPassword, upsertAddress, deleteAddress, logout,
     upsertCampaign, deleteCampaign,
     analytics
   };

@@ -78,7 +78,10 @@ export function ProductCard({ product, navigate, compact = false }) {
   );
 }
 
-export function StatCard({ label, value, hint }) {
+export function StatCard({ label, value, hint, compact = false }) {
+  if (compact) {
+    return <Card className="p-3 sm:p-5"><p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#8A7A98] sm:text-xs sm:tracking-[.14em]">{label}</p><p className="mt-1 font-display text-xl font-bold text-white sm:mt-2 sm:text-3xl">{value}</p>{hint && <p className="mt-1 text-[11px] text-[#8A7A98] sm:text-sm">{hint}</p>}</Card>;
+  }
   return <Card className="p-5"><p className="text-xs font-bold uppercase tracking-[.14em] text-[#8A7A98]">{label}</p><p className="mt-2 font-display text-3xl font-bold text-white">{value}</p>{hint && <p className="mt-1 text-sm text-[#8A7A98]">{hint}</p>}</Card>;
 }
 

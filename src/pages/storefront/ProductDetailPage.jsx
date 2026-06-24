@@ -34,7 +34,7 @@ export function ProductDetailPage({ navigate, params }) {
       <section className="pb-16">
         <div className="container-lux grid gap-10 lg:grid-cols-2">
           <div>
-            <div className="relative h-[520px] rounded-3xl border border-[rgba(201,169,110,.12)] bg-surface-2 product-image" style={{ backgroundImage: `url(${image || product.images?.[0]})` }}>
+            <div className="relative h-[360px] rounded-3xl border border-[rgba(201,169,110,.12)] bg-surface-2 product-image sm:h-[440px] lg:h-[520px]" style={{ backgroundImage: `url(${image || product.images?.[0]})` }}>
               {product.badge && <div className="absolute left-5 top-5"><Badge>{product.badge}</Badge></div>}
             </div>
             <div className="mt-4 flex gap-3 overflow-x-auto pb-2">

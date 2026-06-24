@@ -42,7 +42,7 @@ export function AboutPage({ navigate }) {
             </div>
           </div>
           <Card className="overflow-hidden">
-            <div className="h-[420px] product-image" style={{ backgroundImage: `url(${imageBank.about})` }} />
+            <div className="h-[260px] product-image sm:h-[340px] lg:h-[420px]" style={{ backgroundImage: `url(${imageBank.about})` }} />
           </Card>
         </div>
       </section>

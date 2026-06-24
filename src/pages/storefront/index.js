@@ -7,6 +7,7 @@ export { CheckoutPage } from './CheckoutPage.jsx';
 export { WishlistPage } from './WishlistPage.jsx';
 export { TrackingPage } from './TrackingPage.jsx';
 export { LoginPage } from './LoginPage.jsx';
+export { ResetPasswordPage } from './ResetPasswordPage.jsx';
 export { AccountPage } from './AccountPage.jsx';
 export { ContactPage } from './ContactPage.jsx';
 export { AboutPage } from './AboutPage.jsx';

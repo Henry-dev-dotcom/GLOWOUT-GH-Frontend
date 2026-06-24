@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Badge, Button, Card, Field, PageHero } from '../../components/Common';
+import { GoogleSignInButton } from '../../components/GoogleSignInButton';
 
 const demoAccounts = [
   { label: 'Owner', email: 'owner@glowoutgh.test', role: 'Admin dashboard access' },
@@ -10,7 +11,7 @@ const demoAccounts = [
 ];
 
 export function LoginPage({ navigate, mode = 'login' }) {
-  const { currentUser, login, logout, registerCustomer, requestPasswordReset } = useStore();
+  const { currentUser, login, loginWithGoogle, logout, registerCustomer, requestPasswordReset } = useStore();
   const [activeMode, setActiveMode] = useState(mode);
   const [loginForm, setLoginForm] = useState({ email: 'owner@glowoutgh.test', password: 'glowoutgh123' });
   const [registerForm, setRegisterForm] = useState({ name: '', email: '', phone: '', city: '', password: '', confirmPassword: '' });
@@ -23,6 +24,14 @@ export function LoginPage({ navigate, mode = 'login' }) {
     e.preventDefault();
     setMessage({ type: '', text: 'Checking account...' });
     const result = await login(loginForm.email, loginForm.password);
+    if (!result.ok) return setMessage({ type: 'error', text: result.message });
+    setMessage({ type: 'success', text: 'Login successful. Redirecting...' });
+    navigate(result.user.type === 'admin' ? 'admin.dashboard' : 'account');
+  }
+
+  async function handleGoogleCredential(credential) {
+    setMessage({ type: '', text: 'Verifying Google sign-in...' });
+    const result = await loginWithGoogle(credential);
     if (!result.ok) return setMessage({ type: 'error', text: result.message });
     setMessage({ type: 'success', text: 'Login successful. Redirecting...' });
     navigate(result.user.type === 'admin' ? 'admin.dashboard' : 'account');
@@ -116,6 +125,7 @@ export function LoginPage({ navigate, mode = 'login' }) {
                     {message.text && <p className={`mt-4 rounded-xl border p-3 text-sm ${noticeClass}`}>{message.text}</p>}
                     <Button className="mt-6 w-full" type="submit">Login</Button>
                     <button type="button" onClick={() => setActiveMode('forgot')} className="mt-4 block w-full text-center text-sm text-gold">Forgot password?</button>
+                    <GoogleSignInButton onCredential={handleGoogleCredential} onError={(text) => setMessage({ type: 'error', text })} />
                   </form>
                 )}
 

@@ -3,7 +3,7 @@ import { StoreProvider } from './context/StoreContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { StoreLayout } from './components/Layout';
 import { useHashRouter } from './hooks/useHashRouter';
-import { AccountPage, AboutPage, BlogPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, FAQPage, HomePage, LoginPage, OrderConfirmationPage, PaymentStatusPage, ProductDetailPage, ReturnsPolicyPage, ReviewsPage, ShopPage, TrackingPage, WishlistPage } from './pages/storefront';
+import { AccountPage, AboutPage, BlogPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, FAQPage, HomePage, LoginPage, OrderConfirmationPage, PaymentStatusPage, ProductDetailPage, ResetPasswordPage, ReturnsPolicyPage, ReviewsPage, ShopPage, TrackingPage, WishlistPage } from './pages/storefront';
 import { AdminDashboard, AnalyticsPage, CategoryManager, CouponsManager, CustomersManager, FinancePage, MarketingPage, OrdersManager, ProductManager, ReturnsManager, SettingsPage, TeamPage } from './pages/admin';
 
 function AppRouter() {
@@ -41,6 +41,7 @@ function AppRouter() {
     case 'login': page = <LoginPage navigate={navigate} mode="login" />; break;
     case 'register': page = <LoginPage navigate={navigate} mode="register" />; break;
     case 'forgot-password': page = <LoginPage navigate={navigate} mode="forgot" />; break;
+    case 'reset-password': page = <ResetPasswordPage navigate={navigate} params={params} />; break;
     case 'account': page = <AccountPage navigate={navigate} />; break;
     case 'contact': page = <ContactPage />; break;
     case 'about': page = <AboutPage navigate={navigate} />; break;
