@@ -1,3 +1,4 @@
+import { Heart } from 'lucide-react';
 import { money, statusClass } from '../utils/helpers';
 import { useStore } from '../context/StoreContext';
 
@@ -71,7 +72,7 @@ export function ProductCard({ product, navigate, compact = false }) {
         </div>
         <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
           <Button disabled={!product.available || product.stock <= 0} onClick={() => addToCart(product.id)} className="w-full">Add to Cart</Button>
-          <Button variant="ghost" onClick={() => toggleWishlist(product.id)} className={liked ? 'text-rose-light' : ''}>{liked ? '♥' : '♡'}</Button>
+          <Button variant="ghost" onClick={() => toggleWishlist(product.id)} aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'} className={liked ? 'text-rose-light' : ''}><Heart size={18} fill={liked ? 'currentColor' : 'none'} /></Button>
         </div>
       </div>
     </article>

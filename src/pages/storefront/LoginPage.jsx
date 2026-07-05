@@ -2,18 +2,12 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Badge, Button, Card, Field, PageHero } from '../../components/Common';
 import { GoogleSignInButton } from '../../components/GoogleSignInButton';
-
-const demoAccounts = [
-  { label: 'Owner', email: 'owner@glowoutgh.test', role: 'Admin dashboard access' },
-  { label: 'Admin', email: 'admin@glowoutgh.test', role: 'Operations access' },
-  { label: 'Staff', email: 'staff@glowoutgh.test', role: 'Product manager access' },
-  { label: 'Customer', email: 'ama@example.com', role: 'Customer account access' }
-];
+import { isValidEmail, isValidGhanaPhone } from '../../utils/helpers';
 
 export function LoginPage({ navigate, mode = 'login' }) {
   const { currentUser, login, loginWithGoogle, logout, registerCustomer, requestPasswordReset } = useStore();
   const [activeMode, setActiveMode] = useState(mode);
-  const [loginForm, setLoginForm] = useState({ email: 'owner@glowoutgh.test', password: 'glowoutgh123' });
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({ name: '', email: '', phone: '', city: '', password: '', confirmPassword: '' });
   const [resetEmail, setResetEmail] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -39,6 +33,9 @@ export function LoginPage({ navigate, mode = 'login' }) {
 
   async function submitRegister(e) {
     e.preventDefault();
+    if (!isValidEmail(registerForm.email)) return setMessage({ type: 'error', text: 'Please enter a valid email address.' });
+    if (registerForm.phone && !isValidGhanaPhone(registerForm.phone)) return setMessage({ type: 'error', text: 'Please enter a valid Ghana phone number, e.g. 024 000 0000.' });
+    if (registerForm.password.length < 8) return setMessage({ type: 'error', text: 'Password must be at least 8 characters.' });
     if (registerForm.password !== registerForm.confirmPassword) return setMessage({ type: 'error', text: 'Passwords do not match.' });
     setMessage({ type: '', text: 'Creating account...' });
     const result = await registerCustomer(registerForm);
@@ -53,12 +50,6 @@ export function LoginPage({ navigate, mode = 'login' }) {
     setMessage({ type: result.ok ? 'success' : 'error', text: result.message });
   }
 
-  function useDemo(email) {
-    setActiveMode('login');
-    setLoginForm({ email, password: 'glowoutgh123' });
-    setMessage({ type: '', text: '' });
-  }
-
   const noticeClass = message.type === 'success' ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200' : 'border-rose/20 bg-rose/10 text-rose-light';
 
   return (
@@ -69,30 +60,14 @@ export function LoginPage({ navigate, mode = 'login' }) {
           <div className="grid gap-5">
             <div className="grid gap-5 md:grid-cols-2">
               <Card className="p-6">
-                <h3 className="font-display text-2xl font-bold text-gold">Customer Accounts</h3>
-                <p className="mt-3 leading-7 text-[#8A7A98]">Customers can register, save delivery details, track orders, manage returns and keep products in their wishlist.</p>
+                <h3 className="font-display text-2xl font-bold text-gold">Your Account</h3>
+                <p className="mt-3 leading-7 text-[#8A7A98]">Register to save delivery details, track orders, manage returns and keep favourite products in your wishlist.</p>
               </Card>
               <Card className="p-6">
-                <h3 className="font-display text-2xl font-bold text-gold">Admin Access</h3>
-                <p className="mt-3 leading-7 text-[#8A7A98]">Team members enter the dashboard based on their assigned role. Backend JWT authentication will replace the demo password later.</p>
+                <h3 className="font-display text-2xl font-bold text-gold">Shop with Confidence</h3>
+                <p className="mt-3 leading-7 text-[#8A7A98]">Your details are kept secure, and your order history is always available from your account area.</p>
               </Card>
             </div>
-            <Card className="p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-display text-2xl font-bold">Demo access</h3>
-                <Badge>password: glowoutgh123</Badge>
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {demoAccounts.map((account) => (
-                  <button key={account.email} onClick={() => useDemo(account.email)} className="rounded-2xl border border-[rgba(201,169,110,.12)] bg-surface-2 p-4 text-left transition hover:border-gold/40">
-                    <p className="font-bold text-white">{account.label}</p>
-                    <p className="mt-1 text-sm text-gold">{account.email}</p>
-                    <p className="mt-1 text-xs text-[#8A7A98]">{account.role}</p>
-                  </button>
-                ))}
-              </div>
-              <p className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-100">Production login should use the backend auth API. This frontend keeps demo authentication so you can test the user journey now.</p>
-            </Card>
           </div>
 
           <Card className="p-7">
@@ -153,7 +128,7 @@ export function LoginPage({ navigate, mode = 'login' }) {
                 {activeMode === 'forgot' && (
                   <form onSubmit={submitReset}>
                     <h3 className="font-display text-3xl font-bold">Forgot password</h3>
-                    <p className="mt-2 text-sm leading-6 text-[#8A7A98]">Enter your email to save a reset request. Email delivery will connect to the backend notification service later.</p>
+                    <p className="mt-2 text-sm leading-6 text-[#8A7A98]">Enter the email on your account and we will send you a password reset link.</p>
                     <div className="mt-6 space-y-4">
                       <Field label="Email Address" type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} required />
                     </div>

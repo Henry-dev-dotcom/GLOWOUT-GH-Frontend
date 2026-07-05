@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /cart
+Disallow: /payment-status
+Disallow: /order-confirmation
+
+# Update the host below to your production domain before launch.
+Sitemap: https://YOUR-DOMAIN/sitemap.xml

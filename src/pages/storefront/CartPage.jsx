@@ -4,16 +4,9 @@ import { Button, Card, EmptyState, PageHero, ProductCard, ProductImage } from '.
 import { money, safeNumber } from '../../utils/helpers';
 
 export function CartPage({ navigate }) {
-  const { cartItems, wishlist, products, updateCartQty, removeFromCart, saveForLater, cartTotals, appliedCouponCode, applyCoupon, clearCoupon, settings } = useStore();
-  const [code, setCode] = useState(appliedCouponCode || '');
-  const [message, setMessage] = useState('');
+  const { cartItems, wishlist, products, updateCartQty, removeFromCart, saveForLater, cartTotals, settings } = useStore();
   const savedItems = products.filter((p) => wishlist.includes(p.id) && !cartItems.some((item) => item.product.id === p.id)).slice(0, 4);
   const recommended = useMemo(() => products.filter((p) => p.available && p.stock > 0).slice(0, 4), [products]);
-
-  function apply() {
-    const result = applyCoupon(code);
-    setMessage(result.reason || '');
-  }
 
   if (!cartItems.length) {
     return (
@@ -33,7 +26,7 @@ export function CartPage({ navigate }) {
 
   return (
     <>
-      <PageHero eyebrow="Cart" title="Review your order">Adjust quantities, apply a coupon and confirm delivery costs before checkout.</PageHero>
+      <PageHero eyebrow="Cart" title="Review your order">Adjust quantities and confirm delivery costs before checkout.</PageHero>
       <section className="pb-16">
         <div className="container-lux grid gap-8 lg:grid-cols-[1fr_390px]">
           <div className="space-y-4">
@@ -64,33 +57,26 @@ export function CartPage({ navigate }) {
             <DeliveryEstimator subtotal={cartTotals.subtotal} settings={settings} />
             {!!savedItems.length && <ProductStrip title="Saved for later" products={savedItems} navigate={navigate} compact />}
           </div>
-          <OrderSummary code={code} setCode={setCode} apply={apply} message={message} navigate={navigate} />
+          <OrderSummary navigate={navigate} />
         </div>
       </section>
     </>
   );
 }
 
-function OrderSummary({ code, setCode, apply, message, navigate }) {
-  const { cartTotals, clearCoupon, appliedCouponCode, settings } = useStore();
+function OrderSummary({ navigate }) {
+  const { cartTotals, settings } = useStore();
   return (
     <Card className="h-fit p-6 lg:sticky lg:top-24">
       <h3 className="font-display text-2xl font-bold">Order Summary</h3>
       <div className="mt-5 space-y-3 text-sm">
         <Row label="Subtotal" value={money(cartTotals.subtotal, settings.currency)} />
-        <Row label="Discount" value={`-${money(cartTotals.discount, settings.currency)}`} />
         <Row label="Shipping" value={cartTotals.shipping ? money(cartTotals.shipping, settings.currency) : 'Free'} />
         <Row label={`Tax (${settings.taxRate}%)`} value={money(cartTotals.tax, settings.currency)} />
         <div className="border-t border-[rgba(201,169,110,.12)] pt-3"><Row label="Total" value={money(cartTotals.total, settings.currency)} big /></div>
       </div>
-      <div className="mt-6 flex gap-2">
-        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="field" placeholder="Coupon code" />
-        <Button variant="outline" onClick={apply}>Apply</Button>
-      </div>
-      {appliedCouponCode && <button onClick={clearCoupon} className="mt-2 text-sm font-semibold text-rose-light">Remove {appliedCouponCode}</button>}
-      {message && <p className="mt-2 text-sm text-gold-light">{message}</p>}
       <Button onClick={() => navigate('checkout')} className="mt-6 w-full">Proceed to Checkout</Button>
-      <p className="mt-4 text-center text-xs leading-5 text-[#8A7A98]">Delivery, coupon and tax totals will be rechecked before order creation.</p>
+      <p className="mt-4 text-center text-xs leading-5 text-[#8A7A98]">Delivery and tax totals will be rechecked before order creation.</p>
     </Card>
   );
 }

@@ -29,7 +29,7 @@ export class ErrorBoundary extends React.Component {
           <p className="mt-4 rounded-2xl border border-[rgba(201,169,110,.12)] bg-surface-2 p-3 text-sm text-[#8A7A98]">{this.state.message}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button onClick={() => window.location.reload()}>Refresh Page</Button>
-            <Button variant="outline" onClick={() => { window.location.hash = '#home'; window.location.reload(); }}>Return Home</Button>
+            <Button variant="outline" onClick={() => { window.location.assign('/'); }}>Return Home</Button>
           </div>
         </div>
       </div>

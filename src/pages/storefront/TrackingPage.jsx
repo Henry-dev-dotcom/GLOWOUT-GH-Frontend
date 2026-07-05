@@ -11,7 +11,7 @@ const steps = [
 ];
 
 export function TrackingPage({ params }) {
-  const { orders, products, settings, loadDemoOrders } = useStore();
+  const { orders, products, settings } = useStore();
   const [orderId, setOrderId] = useState(params.order || '');
   const [searched, setSearched] = useState(Boolean(params.order));
   const order = orders.find((o) => o.id.toLowerCase() === orderId.trim().toLowerCase());
@@ -27,10 +27,9 @@ export function TrackingPage({ params }) {
       <section className="pb-16">
         <div className="container-lux max-w-5xl">
           <Card className="p-6">
-            <form onSubmit={search} className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+            <form onSubmit={search} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
               <Field label="Order ID" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="GH-1001" />
               <Button type="submit">Search</Button>
-              <Button type="button" variant="ghost" onClick={() => { loadDemoOrders(); setOrderId('GH-1001'); setSearched(true); }}>Load Demo</Button>
             </form>
           </Card>
 
@@ -95,7 +94,7 @@ export function TrackingPage({ params }) {
               </div>
             </Card>
           ) : searched ? (
-            <div className="mt-6"><EmptyState title="Order not found" action={<Button variant="outline" onClick={() => { loadDemoOrders(); setOrderId('GH-1001'); }}>Try demo order GH-1001</Button>}>Check the order ID and try again. Newly created checkout orders will also appear here.</EmptyState></div>
+            <div className="mt-6"><EmptyState title="Order not found">Check the order ID and try again. If you still cannot find your order, contact support with your order number.</EmptyState></div>
           ) : null}
         </div>
       </section>

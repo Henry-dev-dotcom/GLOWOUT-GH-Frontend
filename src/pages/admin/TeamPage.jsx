@@ -8,7 +8,6 @@ const roles = ['Owner', 'Admin', 'Product Manager', 'Order Manager', 'Marketing 
 const permissions = [
   { key: 'products.manage', label: 'Manage products', desc: 'Create, edit, duplicate and delete products.' },
   { key: 'orders.manage', label: 'Manage orders', desc: 'View order details and update fulfilment.' },
-  { key: 'coupons.manage', label: 'Manage coupons', desc: 'Create and control coupon rules.' },
   { key: 'returns.manage', label: 'Manage returns', desc: 'Approve, decline, refund and restock returns.' },
   { key: 'customers.manage', label: 'Manage customers', desc: 'View customer profiles, VIPs and notes.' },
   { key: 'finance.view', label: 'View finance', desc: 'Access sales, tax and refund reports.' },
@@ -21,7 +20,7 @@ const defaultPermissions = {
   Admin: permissions.map((p) => p.key).filter((key) => key !== 'team.manage'),
   'Product Manager': ['products.manage'],
   'Order Manager': ['orders.manage', 'returns.manage', 'customers.manage'],
-  'Marketing Manager': ['coupons.manage', 'customers.manage'],
+  'Marketing Manager': ['customers.manage'],
   'Finance Manager': ['finance.view', 'orders.manage'],
   Support: ['orders.manage', 'returns.manage', 'customers.manage']
 };
@@ -73,7 +72,7 @@ export function TeamPage({ view, navigate }) {
             <Field label="Email" type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} />
             <SelectField label="Role" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })}>{roles.map((role) => <option key={role}>{role}</option>)}</SelectField>
             <label className="flex gap-2 text-sm text-[#C8BAD0]"><input type="checkbox" checked={draft.active !== false} onChange={(e) => setDraft({ ...draft, active: e.target.checked })} /> Active account</label>
-            <div className="rounded-2xl bg-surface-2 p-4 text-sm text-[#8A7A98]">New users use the current demo password <b className="text-gold">glowoutgh123</b> until backend auth/invitation emails are connected.</div>
+            <div className="rounded-2xl bg-surface-2 p-4 text-sm text-[#8A7A98]">New team members receive their login details from the store owner. Passwords should be changed after first sign-in.</div>
             <div className="flex gap-2"><Button type="submit">Save User</Button><Button type="button" variant="ghost" onClick={() => setDraft({ name: '', email: '', role: 'Support', active: true })}>Clear</Button></div>
           </form>
         </Card>
@@ -84,7 +83,7 @@ export function TeamPage({ view, navigate }) {
       </div>
 
       <Card className="mt-6 p-5">
-        <SectionTitle title="Permission Matrix">Use this as the frontend role model until backend RBAC is connected.</SectionTitle>
+        <SectionTitle title="Permission Matrix">Control which areas of the dashboard each role can manage.</SectionTitle>
         <PermissionMatrix roles={roles} permissions={permissions} value={permissionsByRole} onChange={updatePermission} />
       </Card>
     </AdminShell>

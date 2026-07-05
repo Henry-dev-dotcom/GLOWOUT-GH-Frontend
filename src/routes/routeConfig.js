@@ -18,7 +18,9 @@ export const storefrontRoutes = {
   faq: 'FAQ',
   returns: 'Returns',
   reviews: 'Reviews',
-  blog: 'Blog'
+  blog: 'Blog',
+  terms: 'Terms of Service',
+  privacy: 'Privacy Policy'
 };
 
 export const adminRoutes = {
@@ -26,7 +28,6 @@ export const adminRoutes = {
   'admin.products': 'Product Manager',
   'admin.categories': 'Categories Manager',
   'admin.orders': 'Orders Manager',
-  'admin.coupons': 'Coupons Manager',
   'admin.returns': 'Returns Manager',
   'admin.customers': 'Customers Manager',
   'admin.analytics': 'Sales Analytics',

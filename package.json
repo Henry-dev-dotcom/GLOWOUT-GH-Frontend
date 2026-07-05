@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
     "autoprefixer": "^10.4.20",
+    "lucide-react": "^1.23.0",
     "postcss": "^8.4.49",
     "react": "latest",
     "react-dom": "latest",

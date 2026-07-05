@@ -1,13 +1,22 @@
 import { useMemo } from 'react';
-import { StoreProvider } from './context/StoreContext';
+import { StoreProvider, useStore } from './context/StoreContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Seo } from './components/Seo';
 import { StoreLayout } from './components/Layout';
-import { useHashRouter } from './hooks/useHashRouter';
-import { AccountPage, AboutPage, BlogPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, FAQPage, HomePage, LoginPage, OrderConfirmationPage, PaymentStatusPage, ProductDetailPage, ResetPasswordPage, ReturnsPolicyPage, ReviewsPage, ShopPage, TrackingPage, WishlistPage } from './pages/storefront';
-import { AdminDashboard, AnalyticsPage, CategoryManager, CouponsManager, CustomersManager, FinancePage, MarketingPage, OrdersManager, ProductManager, ReturnsManager, SettingsPage, TeamPage } from './pages/admin';
+import { useRouter } from './hooks/useRouter';
+import { AccountPage, AboutPage, BlogPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, FAQPage, HomePage, LegalPage, LoginPage, OrderConfirmationPage, PaymentStatusPage, ProductDetailPage, ResetPasswordPage, ReturnsPolicyPage, ReviewsPage, ShopPage, TrackingPage, WishlistPage } from './pages/storefront';
+import { AdminDashboard, AnalyticsPage, CategoryManager, CustomersManager, FinancePage, MarketingPage, OrdersManager, ProductManager, ReturnsManager, SettingsPage, TeamPage } from './pages/admin';
+
+function RequireAdmin({ navigate, children }) {
+  const { currentUser } = useStore();
+  if (currentUser?.type !== 'admin') {
+    return <StoreLayout view="login" navigate={navigate}><LoginPage navigate={navigate} mode="login" /></StoreLayout>;
+  }
+  return children;
+}
 
 function AppRouter() {
-  const { route, navigate } = useHashRouter();
+  const { route, navigate } = useRouter();
   const { view, params } = route;
 
   const adminPages = useMemo(() => ({
@@ -15,7 +24,6 @@ function AppRouter() {
     'admin.products': <ProductManager view={view} navigate={navigate} />,
     'admin.categories': <CategoryManager view={view} navigate={navigate} />,
     'admin.orders': <OrdersManager view={view} navigate={navigate} />,
-    'admin.coupons': <CouponsManager view={view} navigate={navigate} />,
     'admin.returns': <ReturnsManager view={view} navigate={navigate} />,
     'admin.customers': <CustomersManager view={view} navigate={navigate} />,
     'admin.analytics': <AnalyticsPage view={view} navigate={navigate} />,
@@ -25,7 +33,7 @@ function AppRouter() {
     'admin.team': <TeamPage view={view} navigate={navigate} />
   }), [view, navigate]);
 
-  if (adminPages[view]) return adminPages[view];
+  if (adminPages[view]) return <><Seo view={view} params={params} /><RequireAdmin navigate={navigate}>{adminPages[view]}</RequireAdmin></>;
 
   let page;
   switch (view) {
@@ -47,13 +55,15 @@ function AppRouter() {
     case 'about': page = <AboutPage navigate={navigate} />; break;
     case 'faq': page = <FAQPage navigate={navigate} />; break;
     case 'returns': page = <ReturnsPolicyPage navigate={navigate} />; break;
+    case 'terms': page = <LegalPage type="terms" />; break;
+    case 'privacy': page = <LegalPage type="privacy" />; break;
     case 'reviews': page = <ReviewsPage navigate={navigate} />; break;
     case 'blog': page = <BlogPage navigate={navigate} params={params} />; break;
     default:
       page = <HomePage navigate={navigate} />;
   }
 
-  return <StoreLayout view={view} navigate={navigate}>{page}</StoreLayout>;
+  return <><Seo view={view} params={params} /><StoreLayout view={view} navigate={navigate}>{page}</StoreLayout></>;
 }
 
 export default function App() {

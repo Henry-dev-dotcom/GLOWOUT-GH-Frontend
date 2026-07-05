@@ -12,13 +12,12 @@ const orderSteps = [
 ];
 
 export function AdminDashboard({ view, navigate }) {
-  const { products, categories, orders, coupons, returns, customers, analytics, settings, campaigns } = useStore();
+  const { products, categories, orders, returns, customers, analytics, settings, campaigns } = useStore();
 
   const recentOrders = orders.slice(0, 5);
   const lowStockProducts = products.filter((p) => p.available && safeNumber(p.stock) <= safeNumber(settings.lowStockThreshold)).slice(0, 5);
   const pendingReturns = returns.filter((r) => ['requested', 'reviewing'].includes(r.status)).slice(0, 5);
   const activeCampaigns = campaigns.filter((c) => c.active).length;
-  const activeCoupons = coupons.filter((c) => c.active).length;
 
   const weeklyRevenue = useMemo(() => {
     const days = Array.from({ length: 7 }, (_, index) => {
@@ -39,7 +38,6 @@ export function AdminDashboard({ view, navigate }) {
   const shortcuts = [
     ['admin.products','Product Manager','🧴','Add products, update stock and manage images'],
     ['admin.orders','Orders','📦','Open order details, invoices and fulfilment timeline'],
-    ['admin.coupons','Coupons','🎟️','Discount rules, usage history and expiry control'],
     ['admin.customers','Customers','👥','Profiles, VIPs, blocks and customer notes'],
     ['admin.returns','Returns','↩️','Approve, decline, refund and restock returns'],
     ['admin.finance','Finance','💰','Filter revenue, discounts, tax and refund reports'],
@@ -64,7 +62,6 @@ export function AdminDashboard({ view, navigate }) {
         <Card className="p-6">
           <SectionTitle title="Store Health">Operational checks for launch readiness.</SectionTitle>
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between rounded-2xl bg-surface-2 p-3"><span>Active coupons</span><strong className="text-gold">{activeCoupons}</strong></div>
             <div className="flex justify-between rounded-2xl bg-surface-2 p-3"><span>Visible categories</span><strong className="text-gold">{categories.filter((c) => c.visible).length}</strong></div>
             <div className="flex justify-between rounded-2xl bg-surface-2 p-3"><span>Active campaigns</span><strong className="text-gold">{activeCampaigns}</strong></div>
             <div className="flex justify-between rounded-2xl bg-surface-2 p-3"><span>Pending returns</span><strong className="text-gold">{pendingReturns.length}</strong></div>

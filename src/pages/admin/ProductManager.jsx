@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field, SelectField, StatCard } from '../../components/Common';
 import { useStore } from '../../context/StoreContext';
-import { defaultCoupons, demoOrders } from '../../data/defaultData';
+import { demoOrders } from '../../data/defaultData';
 import { downloadFile, money, safeNumber, slugify, statusClass, toCSV, todayISO, uid } from '../../utils/helpers';
 import { AdminShell, Toolbar, MiniInput, Action } from './_AdminShared.jsx';
 

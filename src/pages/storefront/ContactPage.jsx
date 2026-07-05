@@ -1,21 +1,25 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { blogPosts, imageBank } from '../../data/defaultData';
-import { Badge, Button, Card, EmptyState, Field, PageHero, ProductCard, ProductImage, SelectField, StatCard } from '../../components/Common';
-import { money } from '../../utils/helpers';
+import { contactApi } from '../../services';
+import { isValidGhanaPhone } from '../../utils/helpers';
+import { Card, Field, PageHero, SelectField, Button } from '../../components/Common';
 
 export function ContactPage() {
   const { settings } = useStore();
   const [form, setForm] = useState({ name: '', email: '', phone: '', type: 'Product enquiry', subject: '', message: '' });
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState({ state: 'idle', text: '' });
   function update(key, value) { setForm((current) => ({ ...current, [key]: value })); }
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    const messages = JSON.parse(localStorage.getItem('glowoutgh_contact_messages') || '[]');
-    messages.unshift({ ...form, id: `MSG-${Date.now().toString().slice(-6)}`, createdAt: new Date().toISOString(), status: 'new' });
-    localStorage.setItem('glowoutgh_contact_messages', JSON.stringify(messages));
-    setSent(true);
-    setForm({ name: '', email: '', phone: '', type: 'Product enquiry', subject: '', message: '' });
+    if (form.phone && !isValidGhanaPhone(form.phone)) return setStatus({ state: 'error', text: 'Please enter a valid Ghana phone number, e.g. 024 000 0000.' });
+    setStatus({ state: 'sending', text: 'Sending your message...' });
+    try {
+      await contactApi.submit(form);
+      setStatus({ state: 'sent', text: `Message received. For an urgent response, reach us on WhatsApp at ${settings.whatsapp}.` });
+      setForm({ name: '', email: '', phone: '', type: 'Product enquiry', subject: '', message: '' });
+    } catch (error) {
+      setStatus({ state: 'error', text: error?.message || `Sorry, we could not send your message. Please try again or WhatsApp us at ${settings.whatsapp}.` });
+    }
   }
   return (
     <>
@@ -29,14 +33,14 @@ export function ContactPage() {
           </div>
           <Card className="p-7">
             <h3 className="font-display text-3xl font-bold">Send a message</h3>
-            <p className="mt-2 text-sm leading-6 text-[#8A7A98]">This frontend stores messages locally for now. When connected to the backend, this form should create support tickets or send email notifications.</p>
+            <p className="mt-2 text-sm leading-6 text-[#8A7A98]">Send us your enquiry and the team will follow up during support hours. For urgent order questions, WhatsApp or phone is fastest.</p>
             <form onSubmit={submit} className="mt-6 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2"><Field label="Full Name" required value={form.name} onChange={(e) => update('name', e.target.value)} /><Field label="Email" required type="email" value={form.email} onChange={(e) => update('email', e.target.value)} /></div>
               <div className="grid gap-4 sm:grid-cols-2"><Field label="Phone" value={form.phone} onChange={(e) => update('phone', e.target.value)} /><SelectField label="Enquiry Type" value={form.type} onChange={(e) => update('type', e.target.value)}><option>Product enquiry</option><option>Order support</option><option>Delivery question</option><option>Returns and exchange</option><option>Wholesale / partnership</option></SelectField></div>
               <Field label="Subject" required value={form.subject} onChange={(e) => update('subject', e.target.value)} />
               <Field label="Message" as="textarea" required rows="6" value={form.message} onChange={(e) => update('message', e.target.value)} />
-              {sent && <p className="rounded-xl bg-emerald-400/10 p-3 text-sm text-emerald-200">Message saved successfully. Backend email/ticket integration can be added next.</p>}
-              <Button type="submit" className="w-full">Send Message</Button>
+              {status.state !== 'idle' && <p className={`rounded-xl p-3 text-sm ${status.state === 'error' ? 'bg-rose/10 text-rose-light' : status.state === 'sent' ? 'bg-emerald-400/10 text-emerald-200' : 'bg-surface-2 text-[#C8BAD0]'}`}>{status.text}</p>}
+              <Button type="submit" className="w-full" disabled={status.state === 'sending'}>{status.state === 'sending' ? 'Sending...' : 'Send Message'}</Button>
             </form>
           </Card>
         </div>

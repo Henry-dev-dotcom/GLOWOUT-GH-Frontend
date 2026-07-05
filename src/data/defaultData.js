@@ -8,7 +8,7 @@ export const imageBank = {
 };
 
 export const defaultSettings = {
-  storeName: 'GLOWOUT GH',
+  storeName: 'GlowOut gh',
   tagline: 'Perfumes · Skincare · Wigs',
   announcement: '',
   email: 'hello@glowoutghbeauty.com',
@@ -18,6 +18,7 @@ export const defaultSettings = {
   currency: 'GH₵',
   taxRate: 7.5,
   deliveryFee: 35,
+  expressDeliveryFee: 60,
   freeDeliveryThreshold: 800,
   instagram: 'https://instagram.com/glowoutghbeauty',
   tiktok: 'https://tiktok.com/@glowoutghbeauty',
@@ -122,33 +123,18 @@ export const defaultProducts = [
   }
 ];
 
-export const defaultCoupons = [
-  {
-    id: 'c_glow10', code: 'GLOW10', name: 'Glow Starter', description: '10% off orders from GH₵200.', type: 'percentage', value: 10,
-    minOrder: 200, maxDiscount: 200, usageLimit: 500, used: 0, active: true, startDate: '2026-01-01', endDate: '2026-12-31', category: 'all', createdAt: '2026-01-01'
-  },
-  {
-    id: 'c_freeship', code: 'FREESHIP', name: 'Free Delivery', description: 'Free delivery on orders from GH₵500.', type: 'shipping', value: 0,
-    minOrder: 500, maxDiscount: 0, usageLimit: 300, used: 0, active: true, startDate: '2026-01-01', endDate: '2026-12-31', category: 'all', createdAt: '2026-02-01'
-  },
-  {
-    id: 'c_beauty50', code: 'BEAUTY50', name: 'Beauty Treat', description: 'GH₵50 off eligible orders.', type: 'fixed', value: 50,
-    minOrder: 300, maxDiscount: 50, usageLimit: 120, used: 12, active: true, startDate: '2026-03-01', endDate: '2026-11-30', category: 'all', createdAt: '2026-03-01'
-  }
-];
-
 export const demoOrders = [
   {
     id: 'GH-1001', createdAt: '2026-06-12T10:30:00.000Z', status: 'processing', paid: true, paymentMethod: 'Mobile Money', courier: 'Bolt Courier', trackingCode: 'BT-98210', notes: 'Pack with thank-you card.',
     customer: { name: 'Ama Mensah', email: 'ama@example.com', phone: '+233 24 111 2222', city: 'Accra', address: 'East Legon, Accra' },
     items: [{ productId: 'p_luna_001', name: 'Luna Oud Eau de Parfum', qty: 1, price: 420 }, { productId: 'p_glow_003', name: 'Radiance Vitamin C Serum', qty: 1, price: 210 }],
-    subtotal: 630, shipping: 35, tax: 47.25, discount: 63, total: 649.25, couponCode: 'GLOW10'
+    subtotal: 630, shipping: 35, tax: 47.25, discount: 0, total: 712.25
   },
   {
     id: 'GH-1002', createdAt: '2026-06-14T15:45:00.000Z', status: 'shipped', paid: true, paymentMethod: 'Card', courier: 'DHL Local', trackingCode: 'DHL-00145', notes: '',
     customer: { name: 'Nana Boateng', email: 'nana@example.com', phone: '+233 50 333 4444', city: 'Kumasi', address: 'Ahodwo, Kumasi' },
     items: [{ productId: 'p_bob_005', name: 'Silk Press Bob Wig', qty: 1, price: 760 }],
-    subtotal: 760, shipping: 35, tax: 57, discount: 0, total: 852, couponCode: ''
+    subtotal: 760, shipping: 35, tax: 57, discount: 0, total: 852
   }
 ];
 

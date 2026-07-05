@@ -14,6 +14,7 @@ export { AboutPage } from './AboutPage.jsx';
 export { BlogPage } from './BlogPage.jsx';
 export { FAQPage } from './FAQPage.jsx';
 export { ReturnsPolicyPage } from './ReturnsPolicyPage.jsx';
+export { LegalPage } from './LegalPage.jsx';
 export { ReviewsPage } from './ReviewsPage.jsx';
 export { SimplePage } from './SimplePage.jsx';
 export { OrderConfirmationPage } from './OrderConfirmationPage.jsx';

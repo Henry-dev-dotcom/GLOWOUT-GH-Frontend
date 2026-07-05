@@ -3,6 +3,28 @@ export const uid = (prefix = 'id') => `${prefix}_${Date.now().toString(36)}_${Ma
 export const slugify = (value = '') => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 export const safeNumber = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 export const money = (amount = 0, currency = 'GH₵') => `${currency}${Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+export const isValidEmail = (email = '') => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+
+// Ghana mobile numbers: local 0XXXXXXXXX (10 digits) or international
+// +233XXXXXXXXX / 233XXXXXXXXX. Spaces, dashes and brackets are ignored.
+export const isValidGhanaPhone = (phone = '') => /^(\+233|233|0)\d{9}$/.test(String(phone).replace(/[\s\-()]/g, ''));
+
+// Normalises any accepted Ghana number to international digits (233XXXXXXXXX),
+// which is the form wa.me links require.
+export function toIntlDigits(raw = '') {
+  let digits = String(raw).replace(/[^\d+]/g, '');
+  if (digits.startsWith('+')) digits = digits.slice(1);
+  if (digits.startsWith('0')) digits = `233${digits.slice(1)}`;
+  else if (!digits.startsWith('233') && digits.length === 9) digits = `233${digits}`;
+  return digits;
+}
+
+// Builds a WhatsApp click-to-chat link with an optional prefilled message.
+export function whatsappLink(number, message = '') {
+  const intl = toIntlDigits(number);
+  return `https://wa.me/${intl}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
+}
 export const statusClass = (status = '') => {
   const key = status.toLowerCase();
   if (['delivered', 'approved', 'active', 'paid', 'completed', 'resolved'].includes(key)) return 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20';

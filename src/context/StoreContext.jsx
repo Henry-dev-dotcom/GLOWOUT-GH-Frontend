@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { defaultCategories, defaultCoupons, defaultProducts, defaultReturns, defaultSettings, defaultTeam, demoCustomers, demoOrders } from '../data/defaultData';
+import { defaultCategories, defaultProducts, defaultReturns, defaultSettings, defaultTeam, demoCustomers, demoOrders } from '../data/defaultData';
 import { normalizeProduct, safeNumber, slugify, todayISO, uid } from '../utils/helpers';
 import {
   BACKEND_ENABLED,
@@ -10,7 +10,7 @@ import {
   productApi,
   categoryApi,
   orderApi,
-  couponApi,
+  paymentApi,
   returnApi,
   customerApi,
   settingsApi,
@@ -20,8 +20,6 @@ import {
   localProductToBackend,
   backendCategoryToLocal,
   localCategoryToBackend,
-  backendCouponToLocal,
-  localCouponToBackend,
   backendUserToLocal,
   localTeamUserToBackend,
   backendCustomerToLocal,
@@ -64,7 +62,6 @@ export function StoreProvider({ children }) {
   const [cart, setCart] = useLocalState('cart', []);
   const [wishlist, setWishlist] = useLocalState('wishlist', []);
   const [orders, setOrders] = useLocalState('orders', []);
-  const [coupons, setCoupons] = useLocalState('coupons', defaultCoupons);
   const [returns, setReturns] = useLocalState('returns', defaultReturns);
   const [team, setTeam] = useLocalState('team', defaultTeam);
   const [customersManual, setCustomersManual] = useLocalState('customers', demoCustomers);
@@ -72,10 +69,8 @@ export function StoreProvider({ children }) {
     { id: 'camp_1', title: 'Weekend Glow Drop', description: 'Feature perfumes and skincare bundles for the weekend.', active: true },
     { id: 'camp_2', title: 'Wig Care Week', description: 'Promote wig units with care instructions and bundle offer.', active: false }
   ]);
-  const [appliedCouponCode, setAppliedCouponCode] = useLocalState('applied_coupon', '');
   const [currentUser, setCurrentUser] = useLocalState('current_user', null);
   const [savedAddresses, setSavedAddresses] = useLocalState('saved_addresses', []);
-  const [passwordResetRequests, setPasswordResetRequests] = useLocalState('password_reset_requests', []);
   const [apiStatus, setApiStatus] = useState({ enabled: BACKEND_ENABLED, connected: false, loading: false, message: BACKEND_ENABLED ? 'Backend not checked yet.' : 'Backend integration disabled.', lastSync: '', lastError: '' });
 
   const productsById = useMemo(() => Object.fromEntries(products.map((p) => [p.id, p])), [products]);
@@ -122,15 +117,13 @@ export function StoreProvider({ children }) {
   async function syncAdminData() {
     if (!BACKEND_ENABLED) return { ok: false, message: 'Backend disabled.' };
     return apiTask('Syncing admin data', async () => {
-      const [apiOrders, apiCoupons, apiReturns, apiCustomers, apiTeam] = await Promise.all([
+      const [apiOrders, apiReturns, apiCustomers, apiTeam] = await Promise.all([
         orderApi.list().catch(() => null),
-        couponApi.list().catch(() => null),
         returnApi.list().catch(() => null),
         customerApi.list().catch(() => null),
         teamApi.list().catch(() => null)
       ]);
       if (Array.isArray(apiOrders)) setOrders(apiOrders.map(backendOrderToLocal));
-      if (Array.isArray(apiCoupons)) setCoupons(apiCoupons.map(backendCouponToLocal));
       if (Array.isArray(apiReturns)) setReturns(apiReturns.map(backendReturnToLocal));
       if (Array.isArray(apiCustomers)) setCustomersManual(apiCustomers.map(backendCustomerToLocal));
       if (Array.isArray(apiTeam)) setTeam(apiTeam.map(backendUserToLocal));
@@ -230,60 +223,54 @@ export function StoreProvider({ children }) {
     setCart((list) => nextQty === 0 ? list.filter((item) => item.productId !== productId) : list.map((item) => item.productId === productId ? { ...item, qty: nextQty } : item));
   }
   function removeFromCart(productId) { setCart((list) => list.filter((item) => item.productId !== productId)); }
-  function clearCart() { setCart([]); setAppliedCouponCode(''); }
+  function clearCart() { setCart([]); }
   function toggleWishlist(productId) { setWishlist((list) => list.includes(productId) ? list.filter((id) => id !== productId) : [...list, productId]); }
   function saveForLater(productId) { toggleWishlist(productId); removeFromCart(productId); }
 
   const cartItems = useMemo(() => cart.map((item) => ({ ...item, product: productsById[item.productId] })).filter((item) => item.product), [cart, productsById]);
-  const validateCoupon = (code = appliedCouponCode, items = cartItems) => {
-    const normalCode = String(code || '').trim().toUpperCase();
-    if (!normalCode) return { valid: false, reason: '', coupon: null, discount: 0, freeShipping: false };
-    const coupon = coupons.find((c) => c.code.toUpperCase() === normalCode);
-    if (!coupon) return { valid: false, reason: 'Coupon code not found.', coupon: null, discount: 0, freeShipping: false };
-    const now = new Date(todayISO());
-    if (!coupon.active) return { valid: false, reason: 'Coupon is hidden or inactive.', coupon, discount: 0, freeShipping: false };
-    if (coupon.startDate && now < new Date(coupon.startDate)) return { valid: false, reason: 'Coupon is not active yet.', coupon, discount: 0, freeShipping: false };
-    if (coupon.endDate && now > new Date(coupon.endDate)) return { valid: false, reason: 'Coupon has expired.', coupon, discount: 0, freeShipping: false };
-    if (coupon.usageLimit && safeNumber(coupon.used) >= safeNumber(coupon.usageLimit)) return { valid: false, reason: 'Coupon usage limit reached.', coupon, discount: 0, freeShipping: false };
-    const eligibleItems = coupon.category && coupon.category !== 'all' ? items.filter((item) => item.product.category === coupon.category) : items;
-    const eligibleSubtotal = eligibleItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
-    if (eligibleSubtotal < safeNumber(coupon.minOrder)) return { valid: false, reason: `Minimum order is ${settings.currency}${coupon.minOrder}.`, coupon, discount: 0, freeShipping: false };
-    let discount = 0; let freeShipping = false;
-    if (coupon.type === 'percentage') discount = eligibleSubtotal * safeNumber(coupon.value) / 100;
-    if (coupon.type === 'fixed') discount = safeNumber(coupon.value);
-    if (coupon.type === 'shipping') freeShipping = true;
-    if (coupon.maxDiscount) discount = Math.min(discount, safeNumber(coupon.maxDiscount));
-    return { valid: true, reason: 'Coupon applied.', coupon, discount, freeShipping };
-  };
   const cartTotals = useMemo(() => {
     const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
-    const couponInfo = validateCoupon(appliedCouponCode, cartItems);
-    const baseShipping = subtotal <= 0 || subtotal >= safeNumber(settings.freeDeliveryThreshold) ? 0 : safeNumber(settings.deliveryFee);
-    const shipping = couponInfo.freeShipping ? 0 : baseShipping;
-    const discount = couponInfo.valid ? couponInfo.discount : 0;
-    const tax = Math.max(subtotal - discount, 0) * safeNumber(settings.taxRate) / 100;
-    const total = Math.max(subtotal - discount, 0) + shipping + tax;
-    return { subtotal, shipping, discount, tax, total, couponInfo };
-  }, [cartItems, appliedCouponCode, coupons, settings]);
+    const shipping = subtotal <= 0 || subtotal >= safeNumber(settings.freeDeliveryThreshold) ? 0 : safeNumber(settings.deliveryFee);
+    const tax = subtotal * safeNumber(settings.taxRate) / 100;
+    const total = subtotal + shipping + tax;
+    return { subtotal, shipping, discount: 0, tax, total };
+  }, [cartItems, settings]);
 
-  function applyCoupon(code) {
-    const result = validateCoupon(code, cartItems);
-    apiTask('Validating coupon with backend', async () => {
-      const backendResult = await couponApi.validate({ code, customerEmail: currentUser?.email, items: cartItems.map((item) => ({ productId: item.product.id, quantity: item.qty })) });
-      return backendResult;
-    }, { silent: true });
-    if (result.valid) setAppliedCouponCode(String(code || '').trim().toUpperCase());
-    return result;
-  }
-  function clearCoupon() { setAppliedCouponCode(''); }
-  function incrementCouponUse(code) {
-    if (!code) return;
-    setCoupons((list) => list.map((c) => c.code.toUpperCase() === String(code).toUpperCase() ? { ...c, used: safeNumber(c.used) + 1 } : c));
-  }
-
+  // Places an order. Returns { ok, order, message }.
+  //
+  // When the backend is enabled it is the single source of truth: the order is
+  // only considered placed if the server creates it (the server also re-prices
+  // everything from the database, so client totals can't be tampered with). If
+  // the API call fails we surface the error and DO NOT fabricate a local order
+  // or decrement local stock — a "successful" checkout that only ever existed
+  // in the shopper's browser would be an order we could never fulfil.
+  //
+  // The local-only path runs solely when the backend is disabled (offline demo
+  // mode), where saving to localStorage is the intended behaviour.
   async function placeOrder(customer, paymentMethod = 'Mobile Money', checkoutDetails = {}) {
-    if (!cartItems.length) return null;
+    if (!cartItems.length) return { ok: false, message: 'Your cart is empty.' };
     const totals = checkoutDetails.totals || cartTotals;
+
+    if (BACKEND_ENABLED) {
+      let errorMessage = '';
+      const backendOrder = await apiTask('Placing your order', () =>
+        orderApi.checkout(checkoutToBackend(customer, cartItems, paymentMethod, { ...checkoutDetails, totals }))
+          .catch((error) => { errorMessage = error?.message || ''; throw error; }), { silent: false });
+      if (!backendOrder) {
+        return { ok: false, message: errorMessage || 'We could not place your order. Please check your connection and try again.' };
+      }
+      const finalOrder = backendOrderToLocal(backendOrder);
+      setOrders((list) => [finalOrder, ...list]);
+      // Refresh stock from the server's authoritative product list so the
+      // storefront reflects the decrement the backend already performed.
+      apiTask('Refreshing products', async () => {
+        const apiProducts = await productApi.list();
+        if (Array.isArray(apiProducts)) setProducts(apiProducts.map(backendProductToLocal));
+      }, { silent: true });
+      clearCart();
+      return { ok: true, order: finalOrder };
+    }
+
     const paymentStatus = checkoutDetails.paymentStatus || (paymentMethod === 'Cash on Delivery' ? 'unpaid' : 'pending');
     const localOrder = {
       id: `GH-${Date.now().toString().slice(-6)}`,
@@ -293,23 +280,48 @@ export function StoreProvider({ children }) {
       deliveryMethod: checkoutDetails.deliveryMethod || 'Standard delivery', deliveryWindow: checkoutDetails.deliveryWindow || '', deliveryFee: safeNumber(totals.shipping),
       paymentReference: checkoutDetails.paymentReference || '', paymentDetails: checkoutDetails.paymentDetails || {}, courier: '', trackingCode: '', notes: checkoutDetails.notes || '', customer,
       items: cartItems.map((item) => ({ productId: item.product.id, name: item.product.name, qty: item.qty, price: item.product.price, image: item.product.images?.[0] || '' })),
-      subtotal: safeNumber(totals.subtotal), shipping: safeNumber(totals.shipping), tax: safeNumber(totals.tax), discount: safeNumber(totals.discount), total: safeNumber(totals.total),
-      couponCode: totals.couponInfo?.valid ? totals.couponInfo.coupon.code : (checkoutDetails.couponCode || '')
+      subtotal: safeNumber(totals.subtotal), shipping: safeNumber(totals.shipping), tax: safeNumber(totals.tax), discount: safeNumber(totals.discount), total: safeNumber(totals.total)
     };
-    let finalOrder = localOrder;
-    if (BACKEND_ENABLED) {
-      const backendOrder = await apiTask('Creating backend order', async () => orderApi.checkout(checkoutToBackend(customer, cartItems, paymentMethod, { ...checkoutDetails, totals })), { silent: false });
-      if (backendOrder) finalOrder = backendOrderToLocal(backendOrder);
-    }
-    setOrders((list) => [finalOrder, ...list]);
+    setOrders((list) => [localOrder, ...list]);
     setProducts((list) => list.map((product) => {
       const bought = cartItems.find((item) => item.product.id === product.id);
       return bought ? { ...product, stock: Math.max(0, safeNumber(product.stock) - bought.qty) } : product;
     }));
-    incrementCouponUse(finalOrder.couponCode);
     clearCart();
-    return finalOrder;
+    return { ok: true, order: localOrder };
   }
+  // Starts a Paystack transaction for a backend order and returns the hosted
+  // checkout URL the customer should be redirected to.
+  async function startPaystackPayment(order) {
+    if (!BACKEND_ENABLED || !order?.backendId) {
+      return { ok: false, message: 'Online payment is unavailable right now. Our team will contact you to complete payment.' };
+    }
+    try {
+      const data = await paymentApi.initialize(order.backendId);
+      if (data?.authorization_url) return { ok: true, url: data.authorization_url, reference: data.reference || '' };
+      return { ok: false, message: 'Could not start the payment. Please try again.' };
+    } catch (error) {
+      return { ok: false, message: error?.message || 'Could not start the payment. Please try again.' };
+    }
+  }
+
+  // Verifies a Paystack payment by reference (used when the customer returns
+  // from the hosted payment page) and syncs the local copy of the order.
+  async function verifyPayment(reference) {
+    if (!BACKEND_ENABLED || !reference) return { ok: false, message: 'Payment verification is unavailable.' };
+    try {
+      const payment = await paymentApi.verify(reference);
+      const status = String(payment?.status || '').toLowerCase();
+      const orderNumber = payment?.order?.orderNumber || '';
+      setOrders((list) => list.map((o) => (o.backendId && o.backendId === payment?.orderId) || (orderNumber && o.id === orderNumber)
+        ? { ...o, paid: status === 'paid', paymentStatus: status || o.paymentStatus, paymentReference: payment?.reference || o.paymentReference, status: status === 'paid' ? 'processing' : o.status }
+        : o));
+      return { ok: true, status, orderId: orderNumber, payment };
+    } catch (error) {
+      return { ok: false, message: error?.message || 'Could not verify the payment.' };
+    }
+  }
+
   function loadDemoOrders() { setOrders((list) => list.length ? list : demoOrders); }
   function upsertOrder(order) {
     setOrders((list) => list.some((o) => o.id === order.id) ? list.map((o) => o.id === order.id ? order : o) : [order, ...list]);
@@ -326,20 +338,6 @@ export function StoreProvider({ children }) {
     apiTask('Deleting backend order', () => orderApi.remove(order?.backendId || id), { silent: true });
   }
 
-  function upsertCoupon(raw) {
-    const coupon = { ...raw, id: raw.id || uid('coupon'), code: String(raw.code || '').trim().toUpperCase(), createdAt: raw.createdAt || todayISO(), used: safeNumber(raw.used) };
-    setCoupons((list) => list.some((c) => c.id === coupon.id) ? list.map((c) => c.id === coupon.id ? coupon : c) : [coupon, ...list]);
-    apiTask('Saving coupon to backend', async () => {
-      const payload = localCouponToBackend(coupon);
-      const saved = raw.id ? await couponApi.update(raw.id, payload) : await couponApi.create(payload);
-      const mapped = backendCouponToLocal(saved);
-      setCoupons((list) => list.map((c) => c.id === coupon.id ? mapped : c));
-      return mapped;
-    }, { silent: true });
-    return coupon;
-  }
-  function deleteCoupon(id) { setCoupons((list) => list.filter((c) => c.id !== id)); apiTask('Deleting coupon from backend', () => couponApi.remove(id), { silent: true }); }
-  function resetCoupons() { setCoupons(defaultCoupons); }
 
   function upsertReturn(raw) {
     const ret = { ...raw, id: raw.id || `RET-${Date.now().toString().slice(-5)}`, createdAt: raw.createdAt || todayISO() };
@@ -390,31 +388,17 @@ export function StoreProvider({ children }) {
   async function login(email, password) {
     const normalEmail = String(email || '').trim().toLowerCase();
     const normalPassword = String(password || '');
-    if (BACKEND_ENABLED) {
-      const backendResult = await apiTask('Logging in with backend', () => authApi.login({ email: normalEmail, password: normalPassword }), { silent: false });
-      if (backendResult?.user && backendResult?.token) {
-        setAuthToken(backendResult.token);
-        const user = backendUserToLocal(backendResult.user);
-        setCurrentUser(user);
-        if (user.type === 'admin') await syncAdminData();
-        return { ok: true, user, source: 'backend' };
-      }
-    }
-    const demoPassword = 'glowoutgh123';
-    const teamUser = team.find((user) => user.email.toLowerCase() === normalEmail && user.active !== false);
-    const customerUser = customers.find((customer) => customer.email.toLowerCase() === normalEmail && !customer.blocked);
-    const customerPasswordOk = customerUser?.password ? customerUser.password === normalPassword : normalPassword === demoPassword;
-    if (teamUser && normalPassword === demoPassword) {
-      const user = { id: teamUser.id, name: teamUser.name, email: teamUser.email, role: teamUser.role, type: 'admin' };
+    if (!BACKEND_ENABLED) return { ok: false, message: 'Login is temporarily unavailable. Please try again shortly.' };
+    let errorMessage = '';
+    const backendResult = await apiTask('Logging in', () => authApi.login({ email: normalEmail, password: normalPassword }).catch((error) => { errorMessage = error?.message || ''; throw error; }), { silent: false });
+    if (backendResult?.user && backendResult?.token) {
+      setAuthToken(backendResult.token);
+      const user = backendUserToLocal(backendResult.user);
       setCurrentUser(user);
-      return { ok: true, user, source: 'local' };
+      if (user.type === 'admin') await syncAdminData();
+      return { ok: true, user, source: 'backend' };
     }
-    if (customerUser && customerPasswordOk) {
-      const user = { id: customerUser.id, name: customerUser.name, email: customerUser.email, role: 'Customer', type: 'customer' };
-      setCurrentUser(user);
-      return { ok: true, user, source: 'local' };
-    }
-    return { ok: false, message: 'Invalid login details. Use a backend account or demo password glowoutgh123.' };
+    return { ok: false, message: errorMessage || 'Login failed. Check your email and password, then try again.' };
   }
 
   async function loginWithGoogle(credential) {
@@ -434,21 +418,17 @@ export function StoreProvider({ children }) {
   async function registerCustomer(raw) {
     const email = String(raw.email || '').trim().toLowerCase();
     if (!raw.name || !email || !raw.password) return { ok: false, message: 'Name, email and password are required.' };
-    if (raw.password.length < 6) return { ok: false, message: 'Password must be at least 6 characters.' };
-    if (BACKEND_ENABLED) {
-      const backendResult = await apiTask('Creating backend account', () => authApi.register({ name: raw.name, email, phone: raw.phone || undefined, password: raw.password, role: 'CUSTOMER' }), { silent: false });
-      if (backendResult?.user && backendResult?.token) {
-        setAuthToken(backendResult.token);
-        const user = backendUserToLocal(backendResult.user);
-        setCurrentUser(user);
-        return { ok: true, user, source: 'backend' };
-      }
+    if (raw.password.length < 8) return { ok: false, message: 'Password must be at least 8 characters.' };
+    if (!BACKEND_ENABLED) return { ok: false, message: 'Registration is temporarily unavailable. Please try again shortly.' };
+    let errorMessage = '';
+    const backendResult = await apiTask('Creating account', () => authApi.register({ name: raw.name, email, phone: raw.phone || undefined, password: raw.password, role: 'CUSTOMER' }).catch((error) => { errorMessage = error?.message || ''; throw error; }), { silent: false });
+    if (backendResult?.user && backendResult?.token) {
+      setAuthToken(backendResult.token);
+      const user = backendUserToLocal(backendResult.user);
+      setCurrentUser(user);
+      return { ok: true, user, source: 'backend' };
     }
-    if (team.some((user) => user.email.toLowerCase() === email) || customers.some((customer) => customer.email.toLowerCase() === email)) return { ok: false, message: 'An account already exists with this email.' };
-    const customer = upsertCustomer({ name: raw.name, email, phone: raw.phone || '', city: raw.city || '', vip: false, blocked: false, orders: 0, spend: 0, password: raw.password, joinedAt: todayISO() });
-    const user = { id: customer.id, name: customer.name, email: customer.email, role: 'Customer', type: 'customer' };
-    setCurrentUser(user);
-    return { ok: true, user, source: 'local' };
+    return { ok: false, message: errorMessage || 'Unable to create your account right now. Please try again.' };
   }
 
   function updateCurrentUserProfile(raw) {
@@ -466,32 +446,26 @@ export function StoreProvider({ children }) {
 
   async function changePassword(currentPassword, nextPassword) {
     if (!currentUser) return { ok: false, message: 'Login required.' };
-    if (!nextPassword || nextPassword.length < 6) return { ok: false, message: 'New password must be at least 6 characters.' };
-    if (BACKEND_ENABLED) {
-      const result = await apiTask('Updating backend password', () => authApi.changePassword({ currentPassword, newPassword: nextPassword }), { silent: false });
-      if (result !== null) return { ok: true, message: 'Password updated.' };
-    }
-    const customer = customers.find((item) => item.id === currentUser.id || item.email.toLowerCase() === currentUser.email.toLowerCase());
-    if (currentUser.type === 'customer' && customer?.password && customer.password !== currentPassword) return { ok: false, message: 'Current password is incorrect.' };
-    if (currentUser.type === 'customer' && customer) upsertCustomer({ ...customer, password: nextPassword });
-    return { ok: true, message: 'Password updated for this demo account.' };
+    if (!nextPassword || nextPassword.length < 8) return { ok: false, message: 'New password must be at least 8 characters.' };
+    if (!BACKEND_ENABLED) return { ok: false, message: 'Password changes are temporarily unavailable. Please try again shortly.' };
+    let errorMessage = '';
+    const result = await apiTask('Updating password', () => authApi.changePassword({ currentPassword, newPassword: nextPassword }).catch((error) => { errorMessage = error?.message || ''; throw error; }), { silent: false });
+    if (result !== null) return { ok: true, message: 'Password updated.' };
+    return { ok: false, message: errorMessage || 'Unable to update your password. Check your current password and try again.' };
   }
 
   async function requestPasswordReset(email) {
     const normalEmail = String(email || '').trim().toLowerCase();
     if (!normalEmail) return { ok: false, message: 'Enter your email address.' };
-    if (BACKEND_ENABLED) {
-      try {
-        await authApi.requestPasswordReset(normalEmail);
-      } catch {
-        // The backend always returns success to avoid leaking which emails
-        // exist; a thrown error here means a network/server problem, not a
-        // missing account. We still show the same neutral message.
-      }
-      return { ok: true, message: 'If an account exists for that email, a reset link has been sent. Check your inbox.' };
+    if (!BACKEND_ENABLED) return { ok: false, message: 'Password reset is temporarily unavailable. Please contact support.' };
+    try {
+      await authApi.requestPasswordReset(normalEmail);
+    } catch {
+      // The backend always returns success to avoid leaking which emails
+      // exist; a thrown error here means a network/server problem, not a
+      // missing account. We still show the same neutral message.
     }
-    setPasswordResetRequests((list) => [{ id: uid('reset'), email: normalEmail, status: 'requested', createdAt: new Date().toISOString() }, ...list]);
-    return { ok: true, message: 'Password reset request saved (local demo mode).' };
+    return { ok: true, message: 'If an account exists for that email, a reset link has been sent. Check your inbox.' };
   }
 
   async function resetPassword(token, newPassword) {
@@ -563,13 +537,12 @@ export function StoreProvider({ children }) {
   }, [orders, products, productsById, returns, settings.lowStockThreshold]);
 
   const value = {
-    settings, setSettings, products, setProducts, categories, setCategories, visibleCategories, cart, cartItems, wishlist, orders, setOrders, coupons, setCoupons, returns, setReturns, team, customers, campaigns, setCampaigns, appliedCouponCode, currentUser, savedAddresses, passwordResetRequests, apiStatus,
+    settings, setSettings, products, setProducts, categories, setCategories, visibleCategories, cart, cartItems, wishlist, orders, setOrders, returns, setReturns, team, customers, campaigns, setCampaigns, currentUser, savedAddresses, apiStatus,
     syncWithBackend, syncPublicData, syncAdminData,
     upsertProduct, deleteProduct, duplicateProduct, resetProducts,
     upsertCategory, deleteCategory, toggleCategory, resetCategories,
-    addToCart, updateCartQty, removeFromCart, clearCart, toggleWishlist, saveForLater, cartTotals, applyCoupon, clearCoupon, validateCoupon, placeOrder,
+    addToCart, updateCartQty, removeFromCart, clearCart, toggleWishlist, saveForLater, cartTotals, placeOrder, startPaystackPayment, verifyPayment,
     upsertOrder, deleteOrder, loadDemoOrders,
-    upsertCoupon, deleteCoupon, resetCoupons,
     upsertReturn, deleteReturn,
     upsertCustomer, deleteCustomer,
     upsertTeamUser, deleteTeamUser, login, loginWithGoogle, registerCustomer, updateCurrentUserProfile, changePassword, requestPasswordReset, resetPassword, upsertAddress, deleteAddress, logout,

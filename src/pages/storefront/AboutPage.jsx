@@ -3,16 +3,16 @@ import { imageBank } from '../../data/defaultData';
 import { Button, Card, PageHero, StatCard } from '../../components/Common';
 
 const values = [
-  ['Authenticity first', 'Every product page is structured to support verified sourcing, batch notes and transparent product details once the backend is connected.'],
+  ['Authenticity first', 'Every product is sourced from trusted suppliers, with clear details, pricing and stock information on every product page.'],
   ['Beauty that feels personal', 'GLOWOUT GH is designed around guided discovery: fragrance moods, skin goals, wig care needs and clear shopping support.'],
-  ['Operationally ready', 'The storefront is paired with admin tools for products, categories, orders, coupons, returns, customers, finance and team access.']
+  ['Service you can rely on', 'From live stock updates to order tracking and easy returns, every part of the store is built to keep your shopping experience smooth.']
 ];
 
 const promises = [
   'Curated perfumes, skincare, wigs and bodycare for everyday confidence.',
   'Clear product information, stock status and order tracking from purchase to delivery.',
   'Responsive shopping experience across mobile, tablet and desktop.',
-  'A backend-ready structure for real payments, authentication and database storage.'
+  'Secure payments and safe handling of your account and order details.'
 ];
 
 export function AboutPage({ navigate }) {
@@ -22,7 +22,7 @@ export function AboutPage({ navigate }) {
   return (
     <>
       <PageHero eyebrow="About GLOWOUT GH" title="Luxury beauty shopping built for trust, speed and style." image={imageBank.about}>
-        GLOWOUT GH brings perfumes, skincare, wigs and bodycare into one refined online store experience, with a storefront and admin system prepared for real e-commerce operations.
+        GLOWOUT GH brings perfumes, skincare, wigs and bodycare into one refined online store experience — curated products, honest pricing and delivery you can count on.
       </PageHero>
 
       <section className="pb-16">
@@ -31,10 +31,10 @@ export function AboutPage({ navigate }) {
             <p className="section-eyebrow">Our Story</p>
             <h2 className="heading-lg mt-4">A beauty house designed for confident discovery.</h2>
             <p className="mt-6 text-lg leading-9 text-[#C8BAD0]">
-              GLOWOUT GH is positioned as a premium beauty destination where customers can shop fragrance, skin essentials and hair products without confusion. The brand experience is built to feel editorial, clean and high-trust while still supporting practical selling tools such as stock control, order management, coupons and returns.
+              GLOWOUT GH is a premium beauty destination where you can shop fragrance, skin essentials and hair products without confusion. The experience is built to feel editorial, clean and high-trust — from browsing and guided discovery to checkout and delivery.
             </p>
             <p className="mt-4 leading-8 text-[#8A7A98]">
-              This React frontend keeps the dark luxury identity from the original design while turning the site into a scalable app. The next production step is connecting the pages to the backend API so inventory, accounts, payments and orders become live.
+              Whether you are restocking a signature scent, building a skincare routine or choosing your next wig unit, every page is designed to make premium beauty shopping simple, fast and trustworthy.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button onClick={() => navigate('shop')}>Shop Collection</Button>
@@ -49,10 +49,10 @@ export function AboutPage({ navigate }) {
 
       <section className="pb-16">
         <div className="container-lux grid gap-4 md:grid-cols-4">
-          <StatCard label="Products Ready" value={products.length} hint="Managed from admin" />
-          <StatCard label="Categories" value={visibleCategories.length} hint="Visible in storefront" />
-          <StatCard label="Orders Tracked" value={orders.length} hint="Local demo until API" />
-          <StatCard label="Customers" value={customers.length} hint="Account-ready" />
+          <StatCard label="Products" value={products.length} hint="Perfumes, skincare & wigs" />
+          <StatCard label="Categories" value={visibleCategories.length} hint="Curated collections" />
+          <StatCard label="Orders Tracked" value={orders.length} hint="From purchase to delivery" />
+          <StatCard label="Customers" value={customers.length} hint="And growing" />
         </div>
       </section>
 

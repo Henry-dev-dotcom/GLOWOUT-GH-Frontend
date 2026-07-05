@@ -114,7 +114,6 @@ export function ReturnsPolicyPage({ navigate }) {
                 </tbody>
               </table>
             </div>
-            {!!orders.length && <p className="mt-4 text-sm text-[#8A7A98]">Tip: Use an existing order number such as {orders[0]?.id} when testing this frontend flow.</p>}
           </Card>
         </div>
       </section>

@@ -46,7 +46,7 @@ export function OrderConfirmationPage({ navigate, params = {} }) {
             </div>
 
             <div className="mt-8 rounded-2xl border border-gold/20 bg-gold/10 p-5 text-sm leading-7 text-gold-light">
-              A confirmation message will be sent when backend email/SMS notifications are connected. For now, use this order ID for tracking and admin fulfilment testing.
+              Keep your order number safe — you can use it any time on the Track Order page. Our team will contact you to confirm delivery details.
             </div>
           </Card>
 

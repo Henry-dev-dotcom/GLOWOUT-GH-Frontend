@@ -5,7 +5,7 @@ const faqGroups = [
   {
     title: 'Shopping & Products',
     items: [
-      ['Are GLOWOUT GH products authentic?', 'The storefront is built around authenticity messaging and product-detail transparency. In production, sourcing notes, supplier records and batch information can be connected through the backend.'],
+      ['Are GlowOut gh products authentic?', 'Yes. We source every perfume, skincare product and wig from trusted suppliers and verified distributors, and each product page shows clear details so you know exactly what you are buying.'],
       ['How do I choose the right product?', 'Use category pages, product descriptions, ratings, related products and the contact page for support. Product guides in the Beauty Journal also help customers compare options.'],
       ['Can I save products for later?', 'Yes. Use the wishlist button on a product card or product detail page to save products and move them to cart later.']
     ]
@@ -13,24 +13,23 @@ const faqGroups = [
   {
     title: 'Orders & Payment',
     items: [
-      ['Which payment methods are supported?', 'The frontend supports Mobile Money, card, bank transfer and cash-on-delivery UI flows. Real payment processing will be activated through the backend payment integration.'],
-      ['Can I use coupons?', 'Yes. Coupons are managed in the admin panel and validated during cart/checkout. Backend validation will prevent browser-side discount manipulation when connected.'],
-      ['Will I receive order confirmation?', 'The UI creates order confirmation locally for now. Production email/SMS confirmation will be handled by the backend notification system.']
+      ['Which payment methods are supported?', 'You can pay with Mobile Money (MTN, Telecel or AirtelTigo), Visa or Mastercard, bank transfer, or cash on delivery in selected areas.'],
+      ['Will I receive order confirmation?', 'Yes. You receive your order number immediately after checkout, and our team confirms every order before it is dispatched.']
     ]
   },
   {
     title: 'Delivery & Tracking',
     items: [
-      ['How do I track my order?', 'Use the Track Order page and enter your order number. Admin users can add courier details and tracking codes from the Orders Manager.'],
-      ['Can delivery fees change?', 'Yes. Delivery fees, tax and thresholds are controlled from Store Settings and will later come from the backend settings API.'],
-      ['What happens if an order is delayed?', 'The admin Orders Manager supports notes, courier updates and order status changes so customer support can communicate fulfilment progress.']
+      ['How do I track my order?', 'Use the Track Order page and enter your order number. You will see your fulfilment status, courier details and delivery timeline as they update.'],
+      ['Can delivery fees change?', 'Delivery fees depend on your location and the delivery option you choose. Orders above our free-delivery threshold are delivered free.'],
+      ['What happens if an order is delayed?', 'Our support team will keep you updated with courier details and status changes. You can also contact us any time with your order number for an update.']
     ]
   },
   {
     title: 'Returns & Support',
     items: [
-      ['Can I request a return?', 'Yes. The Returns page now includes a customer return request form. Admin users can review, approve, reject or close return requests.'],
-      ['What items cannot be returned?', 'Used, damaged, altered or hygiene-sensitive items may be declined depending on store policy. The final business rules should be confirmed before launch.'],
+      ['Can I request a return?', 'Yes. Submit a return request from the Returns page with your order number and our team will review it and get back to you.'],
+      ['What items cannot be returned?', 'Used, damaged, altered or hygiene-sensitive items (such as opened skincare or worn wigs) may not be eligible for return. See the Returns page for full details.'],
       ['How do I contact support?', 'Use the Contact page for general questions, product support, order support or returns assistance.']
     ]
   }

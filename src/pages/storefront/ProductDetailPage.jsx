@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
+import { Heart } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { Badge, Button, Card, EmptyState, PageHero, ProductCard } from '../../components/Common';
+import { WhatsAppOrderButton } from '../../components/WhatsAppButton';
 import { money, safeNumber } from '../../utils/helpers';
 
 const tabs = ['Overview', 'Details', 'Shipping', 'Reviews'];
@@ -86,8 +88,9 @@ export function ProductDetailPage({ navigate, params }) {
             <div className="mt-8 flex flex-wrap gap-3">
               <Button disabled={!product.available || product.stock <= 0} onClick={addSelectedToCart}>Add {qty} to Cart</Button>
               <Button disabled={!product.available || product.stock <= 0} variant="outline" onClick={buyNow}>Buy Now</Button>
-              <Button variant="ghost" onClick={() => toggleWishlist(product.id)}>{wishlist.includes(product.id) ? 'Saved ♥' : 'Save ♡'}</Button>
+              <Button variant="ghost" onClick={() => toggleWishlist(product.id)} className="inline-flex items-center gap-2"><Heart size={16} fill={wishlist.includes(product.id) ? 'currentColor' : 'none'} />{wishlist.includes(product.id) ? 'Saved' : 'Save'}</Button>
             </div>
+            <div className="mt-3"><WhatsAppOrderButton product={product} /></div>
           </div>
         </div>
 

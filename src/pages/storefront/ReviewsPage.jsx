@@ -51,8 +51,8 @@ export function ReviewsPage({ navigate }) {
       <section className="pb-16">
         <div className="container-lux grid gap-5 md:grid-cols-4">
           <StatCard label="Average Rating" value={avg.toFixed(1)} hint="Across visible reviews" />
-          <StatCard label="Reviews" value={reviews.length} hint="Frontend saved" />
-          <StatCard label="Verified" value={reviews.filter((r) => r.verified).length} hint="Demo verified buyers" />
+          <StatCard label="Reviews" value={reviews.length} hint="From our customers" />
+          <StatCard label="Verified" value={reviews.filter((r) => r.verified).length} hint="Verified buyers" />
           <StatCard label="Top Products" value={topProducts.length} hint="Rated 4.7+" />
         </div>
       </section>

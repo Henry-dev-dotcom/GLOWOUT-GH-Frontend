@@ -12,8 +12,6 @@ const paymentMethodToApi = {
 const paymentMethodToUi = {
   MOMO: 'Mobile Money', CARD: 'Card', BANK_TRANSFER: 'Bank Transfer', CASH_ON_DELIVERY: 'Cash on Delivery', PAYSTACK: 'Paystack'
 };
-const couponTypeToApi = { percentage: 'PERCENTAGE', fixed: 'FIXED_AMOUNT', shipping: 'FREE_SHIPPING' };
-const couponTypeToUi = { PERCENTAGE: 'percentage', FIXED_AMOUNT: 'fixed', FREE_SHIPPING: 'shipping' };
 
 export function mapBackendRole(role) { return roleToUi[role] || role || 'Customer'; }
 export function mapUiRole(role) { return roleToApi[role] || String(role || 'CUSTOMER').toUpperCase().replaceAll(' ', '_'); }
@@ -91,43 +89,6 @@ export function localCategoryToBackend(category) {
     isVisible: category.visible !== false,
     isFeatured: Boolean(category.featured),
     sortOrder: safeNumber(category.order, 0)
-  };
-}
-
-export function backendCouponToLocal(coupon) {
-  return {
-    id: coupon.id,
-    code: coupon.code,
-    name: coupon.name,
-    description: coupon.description || '',
-    type: couponTypeToUi[coupon.type] || 'percentage',
-    value: safeNumber(coupon.value),
-    minOrder: safeNumber(coupon.minOrderAmount),
-    maxDiscount: safeNumber(coupon.maxDiscount),
-    usageLimit: safeNumber(coupon.usageLimit),
-    used: safeNumber(coupon.usedCount),
-    active: coupon.isActive !== false,
-    startDate: coupon.startsAt ? String(coupon.startsAt).slice(0, 10) : '',
-    endDate: coupon.endsAt ? String(coupon.endsAt).slice(0, 10) : '',
-    category: coupon.categorySlugs?.[0] || 'all',
-    createdAt: coupon.createdAt || new Date().toISOString()
-  };
-}
-
-export function localCouponToBackend(coupon) {
-  return {
-    code: String(coupon.code || '').trim().toUpperCase(),
-    name: coupon.name,
-    description: coupon.description || '',
-    type: couponTypeToApi[coupon.type] || 'PERCENTAGE',
-    value: safeNumber(coupon.value),
-    minOrderAmount: safeNumber(coupon.minOrder) || undefined,
-    maxDiscount: safeNumber(coupon.maxDiscount) || undefined,
-    usageLimit: safeNumber(coupon.usageLimit) || undefined,
-    startsAt: coupon.startDate || undefined,
-    endsAt: coupon.endDate || undefined,
-    isActive: coupon.active !== false,
-    categorySlugs: coupon.category && coupon.category !== 'all' ? [coupon.category] : []
   };
 }
 
@@ -220,8 +181,7 @@ export function backendOrderToLocal(order) {
     shipping: safeNumber(order.shippingTotal),
     tax: safeNumber(order.taxTotal),
     discount: safeNumber(order.discountTotal),
-    total: safeNumber(order.grandTotal),
-    couponCode: order.couponCode || ''
+    total: safeNumber(order.grandTotal)
   };
 }
 
@@ -229,7 +189,6 @@ export function checkoutToBackend(customer, cartItems, paymentMethod, checkoutDe
   return {
     customer: { ...customer, country: customer.country || 'Ghana' },
     items: cartItems.map((item) => ({ productId: item.product.id, quantity: item.qty })),
-    couponCode: checkoutDetails.couponCode || checkoutDetails.totals?.couponInfo?.coupon?.code || undefined,
     deliveryMethod: checkoutDetails.deliveryMethod || 'Standard delivery',
     paymentMethod: mapPaymentMethodToApi(paymentMethod),
     adminNote: checkoutDetails.notes || undefined
@@ -268,9 +227,12 @@ export function localReturnToBackend(ret) {
 export function backendSettingsToLocal(settings = {}) {
   const socialLinks = settings.socialLinks || {};
   const currency = settings.currency === 'GHS' ? 'GH₵' : (settings.currency || 'GH₵');
-  const taxRate = safeNumber(settings.taxRate, 0);
+  // Canonical formats: the backend always stores the tax rate as a fraction
+  // (0.075) and the storefront always works in percent (7.5). Convert with a
+  // single, deterministic ×100 — no "is this a fraction or a percent?" guessing.
+  const taxRate = safeNumber(settings.taxRate, 0.075);
   return {
-    storeName: settings.storeName || 'GLOWOUT GH',
+    storeName: settings.storeName || 'GlowOut gh',
     tagline: settings.tagline || 'Perfumes · Skincare · Wigs',
     announcement: settings.announcement ?? settings.announcementText ?? '',
     announcementActive: settings.announcementActive ?? settings.announcementEnabled ?? false,
@@ -279,8 +241,9 @@ export function backendSettingsToLocal(settings = {}) {
     whatsapp: settings.whatsapp || socialLinks.whatsapp || '+233550000000',
     address: settings.address || 'Accra, Ghana',
     currency,
-    taxRate: taxRate > 0 && taxRate <= 1 ? taxRate * 100 : taxRate || 7.5,
+    taxRate: taxRate * 100,
     deliveryFee: safeNumber(settings.deliveryFee, 35),
+    expressDeliveryFee: safeNumber(settings.expressDeliveryFee, 60),
     freeDeliveryThreshold: safeNumber(settings.freeDeliveryThreshold, 800),
     instagram: settings.instagram || socialLinks.instagram || 'https://instagram.com/glowoutghbeauty',
     tiktok: settings.tiktok || socialLinks.tiktok || 'https://tiktok.com/@glowoutghbeauty',
@@ -290,14 +253,16 @@ export function backendSettingsToLocal(settings = {}) {
 }
 
 export function localSettingsToBackend(settings = {}) {
-  const taxRate = safeNumber(settings.taxRate, 7.5);
+  // Storefront percent (7.5) → backend fraction (0.075). Deterministic ÷100.
+  const taxRatePercent = safeNumber(settings.taxRate, 7.5);
   return {
-    storeName: settings.storeName || 'GLOWOUT GH',
+    storeName: settings.storeName || 'GlowOut gh',
     storeEmail: settings.email || settings.storeEmail || 'hello@glowoutghbeauty.com',
     storePhone: settings.phone || settings.storePhone || '+233 55 000 0000',
     currency: settings.currency === 'GH₵' ? 'GHS' : (settings.currency || 'GHS'),
-    taxRate: taxRate > 1 ? taxRate / 100 : taxRate,
+    taxRate: taxRatePercent / 100,
     deliveryFee: safeNumber(settings.deliveryFee, 35),
+    expressDeliveryFee: safeNumber(settings.expressDeliveryFee, 60),
     freeDeliveryThreshold: safeNumber(settings.freeDeliveryThreshold, 800),
     announcementText: settings.announcement || settings.announcementText || '',
     announcementEnabled: Boolean(settings.announcementActive && (settings.announcement || settings.announcementText)),

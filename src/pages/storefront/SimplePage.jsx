@@ -18,7 +18,7 @@ export function SimplePage({ type }) {
   }
   const content = {
     about: ['Curated beauty commerce', 'GLOWOUT GH brings perfumes, skincare, wigs and bodycare into one polished shopping experience. The frontend is organised for growth and ready to connect to the backend API.'],
-    faq: ['Shopping support', 'Customers can find answers on product authenticity, payment methods, delivery, order tracking, coupons and returns.'],
+    faq: ['Shopping support', 'Customers can find answers on product authenticity, payment methods, delivery, order tracking and returns.'],
     returns: ['Simple return flow', 'Return requests can be created, reviewed and managed from the admin dashboard. Production rules can be connected through the backend.'],
     reviews: ['Customer confidence', 'Review cards and ratings help shoppers trust product quality before they buy.']
   }[type] || ['GLOWOUT GH', 'This page is ready for live content.'];

@@ -6,7 +6,6 @@ const adminNav = [
   ['admin.products', 'Product Manager', '🧴'],
   ['admin.categories', 'Categories', '🗂️'],
   ['admin.orders', 'Orders', '📦'],
-  ['admin.coupons', 'Coupons', '🎟️'],
   ['admin.returns', 'Returns', '↩️'],
   ['admin.customers', 'Customers', '👥'],
   ['admin.analytics', 'Analytics', '📊'],
@@ -22,8 +21,8 @@ export function AdminLayout({ view, navigate, title, children }) {
   return (
     <div className="min-h-screen bg-surface-0 text-white">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-[rgba(201,169,110,.12)] bg-surface-1 p-5 lg:block">
-        <button onClick={() => navigate('home')} className="mb-6 block font-display text-2xl font-bold">Glow<span className="italic text-gold">Haus</span></button>
-        <div className="mb-4 rounded-2xl border border-gold/20 bg-gold/10 p-4 text-sm text-gold-light"><p className="font-bold">{userLabel}</p><p className="mt-1 text-xs opacity-80">{currentUser?.role || 'Admin access'} · Backend-ready dashboard</p></div>
+        <button onClick={() => navigate('home')} className="mb-6 block font-display text-2xl font-bold">Glow<span className="italic text-gold">Out</span> gh</button>
+        <div className="mb-4 rounded-2xl border border-gold/20 bg-gold/10 p-4 text-sm text-gold-light"><p className="font-bold">{userLabel}</p><p className="mt-1 text-xs opacity-80">{currentUser?.role || 'Admin access'}</p></div>
         <nav className="space-y-1">
           {adminNav.map(([id, label, icon]) => <button key={id} onClick={() => navigate(id)} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition ${view === id ? 'bg-gold text-ink' : 'text-[#C8BAD0] hover:bg-surface-2 hover:text-gold'}`}><span>{icon}</span><span>{label}</span></button>)}
         </nav>
