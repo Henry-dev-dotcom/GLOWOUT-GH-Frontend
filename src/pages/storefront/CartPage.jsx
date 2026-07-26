@@ -32,7 +32,7 @@ export function CartPage({ navigate }) {
           <div className="space-y-4">
             {cartItems.map(({ product, qty }) => (
               <Card key={product.id} className="grid gap-4 p-4 sm:grid-cols-[120px_1fr_auto]">
-                <button onClick={() => navigate('product', { product: product.id })} className="text-left"><ProductImage product={product} className="h-28" /></button>
+                <button onClick={() => navigate('product', { product: product.slug || product.id })} className="text-left"><ProductImage product={product} className="h-28" /></button>
                 <div>
                   <h3 className="font-display text-xl font-bold">{product.name}</h3>
                   <p className="text-sm text-[#8A7A98]">{product.brand} · {product.sku}</p>

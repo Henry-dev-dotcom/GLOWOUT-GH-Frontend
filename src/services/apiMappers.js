@@ -25,6 +25,7 @@ export function backendProductToLocal(product) {
     : [];
   return {
     id: product.id,
+    slug: product.slug || '',
     sku: product.sku || '',
     name: product.name || '',
     brand: product.brand || '',
@@ -129,8 +130,12 @@ export function backendCustomerToLocal(customer) {
     vip: Boolean(customer.isVip ?? customer.vip),
     blocked: Boolean(customer.isBlocked ?? customer.blocked),
     notes: customer.notes || '',
-    orders: safeNumber(customer._count?.orders || customer.orders?.length || customer.orders, 0),
-    spend: safeNumber(customer.lifetimeValue || customer.spend, 0),
+    // orders/spend are intentionally left at 0 here: StoreContext's `customers`
+    // memo recomputes both by summing the freshly-synced `orders` list per
+    // customer email. Seeding a real count here would double-count, since the
+    // same orders are already present in that list after syncAdminData().
+    orders: 0,
+    spend: 0,
     joinedAt: customer.createdAt || new Date().toISOString()
   };
 }

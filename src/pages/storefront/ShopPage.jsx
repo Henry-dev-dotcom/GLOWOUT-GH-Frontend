@@ -160,7 +160,7 @@ export function ShopPage({ navigate, params }) {
           onClose={() => setQuickView(null)}
           onAdd={() => addToCart(quickView.id)}
           onWishlist={() => toggleWishlist(quickView.id)}
-          onDetails={() => { setQuickView(null); navigate('product', { product: quickView.id }); }}
+          onDetails={() => { setQuickView(null); navigate('product', { product: quickView.slug || quickView.id }); }}
         />
       )}
     </>

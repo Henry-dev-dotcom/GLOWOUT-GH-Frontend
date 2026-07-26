@@ -17,10 +17,10 @@ export function WishlistPage({ navigate }) {
             <div className="grid gap-4">
               {items.map((product) => (
                 <Card key={product.id} className="grid gap-4 p-4 md:grid-cols-[120px_1fr_auto] md:items-center">
-                  <button onClick={() => navigate('product', { product: product.id })} className="text-left"><ProductImage product={product} className="h-28" /></button>
+                  <button onClick={() => navigate('product', { product: product.slug || product.id })} className="text-left"><ProductImage product={product} className="h-28" /></button>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[.16em] text-gold/70">{product.brand}</p>
-                    <button onClick={() => navigate('product', { product: product.id })} className="font-display text-xl font-bold hover:text-gold">{product.name}</button>
+                    <button onClick={() => navigate('product', { product: product.slug || product.id })} className="font-display text-xl font-bold hover:text-gold">{product.name}</button>
                     <p className="mt-1 text-sm text-[#8A7A98]">★ {product.rating} · {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}</p>
                     <p className="mt-2 text-sm leading-6 text-[#C8BAD0]">{product.description}</p>
                   </div>

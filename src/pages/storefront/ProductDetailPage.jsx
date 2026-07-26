@@ -9,7 +9,7 @@ const tabs = ['Overview', 'Details', 'Shipping', 'Reviews'];
 
 export function ProductDetailPage({ navigate, params }) {
   const { products, categories, addToCart, toggleWishlist, wishlist, settings } = useStore();
-  const product = products.find((p) => p.id === params.product) || products[0];
+  const product = products.find((p) => p.slug === params.product || p.id === params.product);
   const [image, setImage] = useState(product?.images?.[0]);
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState('Overview');

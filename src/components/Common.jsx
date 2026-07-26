@@ -53,7 +53,7 @@ export function ProductCard({ product, navigate, compact = false }) {
   const liked = wishlist.includes(product.id);
   return (
     <article className="group overflow-hidden rounded-2xl border border-[rgba(201,169,110,.12)] bg-surface-1 transition hover:-translate-y-1 hover:border-gold/40 hover:shadow-glow">
-      <button onClick={() => navigate('product', { product: product.id })} className="block w-full text-left">
+      <button onClick={() => navigate('product', { product: product.slug || product.id })} className="block w-full text-left">
         <ProductImage product={product} className={compact ? 'h-48' : 'h-64'} rounded={false} />
       </button>
       <div className="p-4">
@@ -61,7 +61,7 @@ export function ProductCard({ product, navigate, compact = false }) {
           <span className="text-[11px] font-bold uppercase tracking-[.16em] text-gold/70">{product.brand}</span>
           {product.badge && <span className="rounded-full bg-rose-deep/35 px-2 py-1 text-[10px] font-bold uppercase text-rose-light">{product.badge}</span>}
         </div>
-        <button onClick={() => navigate('product', { product: product.id })} className="text-left font-display text-lg font-bold leading-snug text-white hover:text-gold">{product.name}</button>
+        <button onClick={() => navigate('product', { product: product.slug || product.id })} className="text-left font-display text-lg font-bold leading-snug text-white hover:text-gold">{product.name}</button>
         <div className="mt-2 flex items-center justify-between text-sm text-[#8A7A98]">
           <span>★ {product.rating} · {product.reviews}</span>
           <span>{product.stock > 0 ? `${product.stock} left` : 'Out of stock'}</span>

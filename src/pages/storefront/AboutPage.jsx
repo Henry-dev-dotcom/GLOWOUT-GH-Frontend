@@ -95,7 +95,7 @@ export function AboutPage({ navigate }) {
                 <div className="p-5">
                   <p className="text-xs font-bold uppercase tracking-[.14em] text-gold/70">{product.brand}</p>
                   <h3 className="mt-2 font-display text-xl font-bold">{product.name}</h3>
-                  <button onClick={() => navigate('product', { product: product.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">View product →</button>
+                  <button onClick={() => navigate('product', { product: product.slug || product.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">View product →</button>
                 </div>
               </Card>
             ))}

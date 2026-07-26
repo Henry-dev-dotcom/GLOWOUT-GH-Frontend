@@ -132,7 +132,7 @@ export function ReviewsPage({ navigate }) {
                 <div className="p-5">
                   <Badge>{product.rating} ★ · {product.reviews} reviews</Badge>
                   <h3 className="mt-3 font-display text-2xl font-bold">{product.name}</h3>
-                  <button onClick={() => navigate('product', { product: product.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">View product →</button>
+                  <button onClick={() => navigate('product', { product: product.slug || product.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">View product →</button>
                 </div>
               </Card>
             ))}
