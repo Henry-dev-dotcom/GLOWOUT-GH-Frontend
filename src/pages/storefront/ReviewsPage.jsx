@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Badge, Button, Card, Field, PageHero, ProductImage, SelectField, StatCard } from '../../components/Common';
+import { Badge, Button, Card, Field, PageHero, ProductImage, Reveal, SelectField, StatCard } from '../../components/Common';
 
 const seedReviews = [
   { id: 'rev_1', name: 'Ama M.', product: 'Luna Oud Eau de Parfum', rating: 5, title: 'Long-lasting and elegant', text: 'The scent feels premium and lasts through the evening without being too loud.', verified: true, date: 'June 2026' },
@@ -97,8 +97,9 @@ export function ReviewsPage({ navigate }) {
               <h2 className="heading-md">Review Feed</h2>
               <button onClick={() => setFilter('all')} className="text-sm font-bold text-gold hover:text-gold-bright">Show all</button>
             </div>
-            {filteredReviews.map((review) => (
-              <Card key={review.id} className="p-6">
+            {filteredReviews.map((review, i) => (
+              <Reveal key={review.id} delay={i * 60}>
+              <Card className="p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -111,6 +112,7 @@ export function ReviewsPage({ navigate }) {
                 </div>
                 <p className="mt-5 leading-8 text-[#C8BAD0]">{review.text}</p>
               </Card>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -126,15 +128,17 @@ export function ReviewsPage({ navigate }) {
             <Button variant="outline" onClick={() => navigate('shop')}>Shop all</Button>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {topProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden">
-                <ProductImage product={product} className="h-60" rounded={false} />
-                <div className="p-5">
-                  <Badge>{product.rating} ★ · {product.reviews} reviews</Badge>
-                  <h3 className="mt-3 font-display text-2xl font-bold">{product.name}</h3>
-                  <button onClick={() => navigate('product', { product: product.slug || product.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">View product →</button>
-                </div>
-              </Card>
+            {topProducts.map((product, i) => (
+              <Reveal key={product.id} delay={i * 80}>
+                <Card className="overflow-hidden">
+                  <ProductImage product={product} className="h-60" rounded={false} />
+                  <div className="p-5">
+                    <Badge>{product.rating} ★ · {product.reviews} reviews</Badge>
+                    <h3 className="mt-3 font-display text-2xl font-bold">{product.name}</h3>
+                    <button onClick={() => navigate('product', { product: product.slug || product.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">View product →</button>
+                  </div>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </div>

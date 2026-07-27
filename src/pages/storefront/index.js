@@ -16,6 +16,5 @@ export { FAQPage } from './FAQPage.jsx';
 export { ReturnsPolicyPage } from './ReturnsPolicyPage.jsx';
 export { LegalPage } from './LegalPage.jsx';
 export { ReviewsPage } from './ReviewsPage.jsx';
-export { SimplePage } from './SimplePage.jsx';
 export { OrderConfirmationPage } from './OrderConfirmationPage.jsx';
 export { PaymentStatusPage } from './PaymentStatusPage.jsx';

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Button, Card, EmptyState, PageHero, ProductCard, ProductImage } from '../../components/Common';
+import { Button, Card, EmptyState, PageHero, ProductCard, ProductImage, Reveal } from '../../components/Common';
 import { money, safeNumber } from '../../utils/helpers';
 
 export function CartPage({ navigate }) {
@@ -30,8 +30,9 @@ export function CartPage({ navigate }) {
       <section className="pb-16">
         <div className="container-lux grid gap-8 lg:grid-cols-[1fr_390px]">
           <div className="space-y-4">
-            {cartItems.map(({ product, qty }) => (
-              <Card key={product.id} className="grid gap-4 p-4 sm:grid-cols-[120px_1fr_auto]">
+            {cartItems.map(({ product, qty }, i) => (
+              <Reveal key={product.id} delay={i * 60}>
+              <Card className="grid gap-4 p-4 transition hover:border-gold/25 sm:grid-cols-[120px_1fr_auto]">
                 <button onClick={() => navigate('product', { product: product.slug || product.id })} className="text-left"><ProductImage product={product} className="h-28" /></button>
                 <div>
                   <h3 className="font-display text-xl font-bold">{product.name}</h3>
@@ -52,6 +53,7 @@ export function CartPage({ navigate }) {
                   <p className="text-sm text-[#8A7A98]">{money(product.price, settings.currency)} each</p>
                 </div>
               </Card>
+              </Reveal>
             ))}
 
             <DeliveryEstimator subtotal={cartTotals.subtotal} settings={settings} />

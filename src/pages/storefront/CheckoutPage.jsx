@@ -79,7 +79,7 @@ function PaymentFields({ method, form, update }) {
 export function CheckoutPage({ navigate }) {
   const { cartItems, cartTotals, placeOrder, startPaystackPayment, settings, currentUser, savedAddresses } = useStore();
   const [step, setStep] = useState(1);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState({ type: '', text: '' });
   const [form, setForm] = useState({
     name: '', email: '', phone: '', city: '', address: '', deliveryMethod: 'standard', paymentMethod: 'Mobile Money', momoNetwork: 'MTN Mobile Money', momo: '', cardName: '', billingEmail: '', bankReference: '', notes: '', terms: false
   });
@@ -108,7 +108,7 @@ export function CheckoutPage({ navigate }) {
     return <><PageHero eyebrow="Checkout" title="Nothing to checkout" /><section className="pb-16"><div className="container-lux"><EmptyState title="Your checkout is empty" action={<Button onClick={() => navigate('shop')}>Shop Now</Button>}>Add products to your cart first.</EmptyState></div></section></>;
   }
 
-  function update(key, value) { setForm((x) => ({ ...x, [key]: value })); setMessage(''); }
+  function update(key, value) { setForm((x) => ({ ...x, [key]: value })); setMessage({ type: '', text: '' }); }
   function applyAddress(address) {
     if (!address) return;
     setForm((x) => ({ ...x, name: x.name || address.name || '', phone: x.phone || address.phone || '', city: address.city || x.city, address: address.address || x.address }));
@@ -125,16 +125,16 @@ export function CheckoutPage({ navigate }) {
   }
   function nextStep() {
     const err = validateStep(step);
-    if (err) return setMessage(err);
+    if (err) return setMessage({ type: 'error', text: err });
     setStep((x) => Math.min(3, x + 1));
   }
   async function submit(e) {
     e.preventDefault();
     const err = validateStep(3);
-    if (err) return setMessage(err);
+    if (err) return setMessage({ type: 'error', text: err });
     const isOnlinePayment = form.paymentMethod === 'Card' || form.paymentMethod === 'Mobile Money';
     const paymentStatus = isOnlinePayment ? 'pending' : 'unpaid';
-    setMessage('Creating your order...');
+    setMessage({ type: '', text: 'Creating your order...' });
     const result = await placeOrder(
       { name: form.name, email: form.email, phone: form.phone, city: form.city, address: form.address },
       form.paymentMethod,
@@ -148,10 +148,10 @@ export function CheckoutPage({ navigate }) {
         status: paymentStatus === 'pending' ? 'payment pending' : 'processing'
       }
     );
-    if (!result.ok) return setMessage(result.message || 'Unable to place order. Please try again.');
+    if (!result.ok) return setMessage({ type: 'error', text: result.message || 'Unable to place order. Please try again.' });
     const order = result.order;
     if (isOnlinePayment) {
-      setMessage('Starting secure payment...');
+      setMessage({ type: '', text: 'Starting secure payment...' });
       const payment = await startPaystackPayment(order);
       if (payment.ok) {
         // Hand over to Paystack's hosted page; the customer returns to the
@@ -223,7 +223,9 @@ export function CheckoutPage({ navigate }) {
               <div className="mt-6 flex flex-wrap justify-between gap-3"><Button type="button" variant="ghost" onClick={() => setStep(2)}>Back</Button><Button type="submit">Place Order</Button></div>
             </Card>}
 
-            {message && <p className="rounded-xl border border-rose/20 bg-rose/10 p-4 text-rose-light">{message}</p>}
+            {message.text && (
+              <p className={`rounded-xl border p-4 ${message.type === 'error' ? 'border-rose/20 bg-rose/10 text-rose-light' : 'border-gold/20 bg-gold/10 text-gold-light'}`}>{message.text}</p>
+            )}
           </div>
 
           <Card className="h-fit p-6 lg:sticky lg:top-24">

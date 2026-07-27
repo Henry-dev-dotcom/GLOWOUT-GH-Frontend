@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Button, Card, EmptyState, PageHero, ProductCard, ProductImage } from '../../components/Common';
+import { Button, Card, EmptyState, PageHero, ProductCard, ProductImage, Reveal } from '../../components/Common';
 import { money } from '../../utils/helpers';
 
 export function WishlistPage({ navigate }) {
@@ -15,21 +15,23 @@ export function WishlistPage({ navigate }) {
         <div className="container-lux space-y-8">
           {items.length ? (
             <div className="grid gap-4">
-              {items.map((product) => (
-                <Card key={product.id} className="grid gap-4 p-4 md:grid-cols-[120px_1fr_auto] md:items-center">
-                  <button onClick={() => navigate('product', { product: product.slug || product.id })} className="text-left"><ProductImage product={product} className="h-28" /></button>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[.16em] text-gold/70">{product.brand}</p>
-                    <button onClick={() => navigate('product', { product: product.slug || product.id })} className="font-display text-xl font-bold hover:text-gold">{product.name}</button>
-                    <p className="mt-1 text-sm text-[#8A7A98]">★ {product.rating} · {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}</p>
-                    <p className="mt-2 text-sm leading-6 text-[#C8BAD0]">{product.description}</p>
-                  </div>
-                  <div className="flex flex-col gap-3 text-right">
-                    <p className="text-xl font-bold text-gold">{money(product.price, settings.currency)}</p>
-                    <Button disabled={!product.available || product.stock <= 0} onClick={() => addToCart(product.id)}>Move to Cart</Button>
-                    <Button variant="ghost" onClick={() => toggleWishlist(product.id)}>Remove</Button>
-                  </div>
-                </Card>
+              {items.map((product, i) => (
+                <Reveal key={product.id} delay={i * 60}>
+                  <Card className="grid gap-4 p-4 transition hover:border-gold/30 md:grid-cols-[120px_1fr_auto] md:items-center">
+                    <button onClick={() => navigate('product', { product: product.slug || product.id })} className="text-left"><ProductImage product={product} className="h-28" /></button>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[.16em] text-gold/70">{product.brand}</p>
+                      <button onClick={() => navigate('product', { product: product.slug || product.id })} className="font-display text-xl font-bold hover:text-gold">{product.name}</button>
+                      <p className="mt-1 text-sm text-[#8A7A98]">★ {product.rating} · {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}</p>
+                      <p className="mt-2 text-sm leading-6 text-[#C8BAD0]">{product.description}</p>
+                    </div>
+                    <div className="flex flex-col gap-3 text-right">
+                      <p className="text-xl font-bold text-gold">{money(product.price, settings.currency)}</p>
+                      <Button disabled={!product.available || product.stock <= 0} onClick={() => addToCart(product.id)}>Move to Cart</Button>
+                      <Button variant="ghost" onClick={() => toggleWishlist(product.id)}>Remove</Button>
+                    </div>
+                  </Card>
+                </Reveal>
               ))}
             </div>
           ) : (
@@ -48,7 +50,7 @@ export function WishlistPage({ navigate }) {
                 <Button variant="outline" onClick={() => navigate('shop')}>Shop More</Button>
               </div>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {recommended.map((p) => <ProductCard key={p.id} product={p} navigate={navigate} compact />)}
+                {recommended.map((p, i) => <Reveal key={p.id} delay={i * 70}><ProductCard product={p} navigate={navigate} compact /></Reveal>)}
               </div>
             </div>
           )}

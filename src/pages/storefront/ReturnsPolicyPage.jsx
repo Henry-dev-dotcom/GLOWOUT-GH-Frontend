@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Badge, Button, Card, Field, PageHero, SelectField } from '../../components/Common';
-import { money } from '../../utils/helpers';
+import { Button, Card, Field, PageHero, Reveal, SelectField } from '../../components/Common';
 
 const steps = [
   ['1', 'Submit request', 'Send your order number, item details and reason for return.'],
@@ -17,7 +16,7 @@ const policyBlocks = [
 ];
 
 export function ReturnsPolicyPage({ navigate }) {
-  const { upsertReturn, returns, orders, settings } = useStore();
+  const { upsertReturn } = useStore();
   const [form, setForm] = useState({ orderId: '', customer: '', reason: 'Wrong item received', refundAmount: '', notes: '' });
   const [message, setMessage] = useState('');
 
@@ -41,12 +40,14 @@ export function ReturnsPolicyPage({ navigate }) {
 
       <section className="pb-16">
         <div className="container-lux grid gap-5 md:grid-cols-4">
-          {steps.map(([num, title, body]) => (
-            <Card key={num} className="p-6 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gold font-black text-ink">{num}</div>
-              <h3 className="mt-5 font-display text-xl font-bold">{title}</h3>
-              <p className="mt-3 leading-7 text-[#8A7A98]">{body}</p>
-            </Card>
+          {steps.map(([num, title, body], i) => (
+            <Reveal key={num} delay={i * 70}>
+              <Card className="p-6 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gold font-black text-ink">{num}</div>
+                <h3 className="mt-5 font-display text-xl font-bold">{title}</h3>
+                <p className="mt-3 leading-7 text-[#8A7A98]">{body}</p>
+              </Card>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -95,25 +96,13 @@ export function ReturnsPolicyPage({ navigate }) {
 
       <section className="pb-20">
         <div className="container-lux">
-          <Card className="p-7">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="section-eyebrow">Existing Requests</p>
-                <h2 className="heading-md mt-3">Recent return activity.</h2>
-              </div>
-              <Badge>{returns.length} request{returns.length === 1 ? '' : 's'}</Badge>
+          <Card className="grid gap-8 overflow-hidden p-8 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="section-eyebrow">Already submitted a request?</p>
+              <h2 className="heading-md mt-3">Check your return status any time.</h2>
+              <p className="mt-4 max-w-2xl leading-8 text-[#8A7A98]">Your order number is all you need to follow a return from submission to refund or exchange.</p>
             </div>
-            <div className="mt-6 overflow-x-auto">
-              <table className="admin-table">
-                <thead><tr><th>ID</th><th>Order</th><th>Customer</th><th>Reason</th><th>Status</th><th>Amount</th></tr></thead>
-                <tbody>
-                  {returns.map((ret) => (
-                    <tr key={ret.id}><td>{ret.id}</td><td>{ret.orderId}</td><td>{ret.customer}</td><td>{ret.reason}</td><td><Badge status={ret.status}>{ret.status}</Badge></td><td>{money(ret.refundAmount, settings.currency)}</td></tr>
-                  ))}
-                  {!returns.length && <tr><td colSpan="6" className="text-center">No return requests yet.</td></tr>}
-                </tbody>
-              </table>
-            </div>
+            <Button onClick={() => navigate('tracking')}>Track Your Order</Button>
           </Card>
         </div>
       </section>

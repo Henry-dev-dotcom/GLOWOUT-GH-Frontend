@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, PageHero } from '../../components/Common';
+import { Button, Card, PageHero, Reveal } from '../../components/Common';
 
 const faqGroups = [
   {
@@ -75,8 +75,9 @@ export function FAQPage({ navigate }) {
           </aside>
 
           <div className="space-y-8">
-            {faqGroups.map((group) => (
-              <Card key={group.title} className="p-6">
+            {faqGroups.map((group, i) => (
+              <Reveal key={group.title} delay={i * 60}>
+              <Card className="p-6">
                 <h2 className="font-display text-3xl font-bold text-gold">{group.title}</h2>
                 <div className="mt-5 space-y-3">
                   {group.items.map(([question, answer], index) => {
@@ -85,6 +86,7 @@ export function FAQPage({ navigate }) {
                   })}
                 </div>
               </Card>
+              </Reveal>
             ))}
           </div>
         </div>

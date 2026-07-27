@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
-import { Badge, Button, Card, EmptyState, PageHero, ProductImage } from '../../components/Common';
+import { Badge, Button, Card, EmptyState, PageHero, ProductImage, Reveal } from '../../components/Common';
 import { money } from '../../utils/helpers';
 
 function Detail({ label, value }) {
@@ -17,9 +18,12 @@ export function OrderConfirmationPage({ navigate, params = {} }) {
 
   return (
     <>
-      <PageHero eyebrow="Order Confirmed" title="Thank you for your order">Your order has been received and saved. Use the tracking page to follow fulfilment updates.</PageHero>
+      <PageHero eyebrow="Order Confirmed" title="Thank you for your order">
+        <span className="inline-flex items-center gap-2 text-emerald-300"><CheckCircle2 size={18} strokeWidth={2} /> Your order has been received and saved.</span> Use the tracking page to follow fulfilment updates.
+      </PageHero>
       <section className="pb-16">
         <div className="container-lux grid gap-8 lg:grid-cols-[1fr_380px]">
+          <Reveal>
           <Card className="p-6">
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[rgba(201,169,110,.12)] pb-5">
               <div>
@@ -49,7 +53,9 @@ export function OrderConfirmationPage({ navigate, params = {} }) {
               Keep your order number safe — you can use it any time on the Track Order page. Our team will contact you to confirm delivery details.
             </div>
           </Card>
+          </Reveal>
 
+          <Reveal delay={120}>
           <Card className="h-fit p-6">
             <h3 className="font-display text-2xl font-bold">Next Steps</h3>
             <div className="mt-5 space-y-4 text-sm leading-7 text-[#C8BAD0]">
@@ -64,6 +70,7 @@ export function OrderConfirmationPage({ navigate, params = {} }) {
               <Button variant="ghost" onClick={() => navigate('shop')}>Continue Shopping</Button>
             </div>
           </Card>
+          </Reveal>
         </div>
       </section>
     </>

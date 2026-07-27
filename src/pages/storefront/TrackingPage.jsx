@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Badge, Button, Card, EmptyState, Field, PageHero, ProductImage, StatCard } from '../../components/Common';
+import { Badge, Button, Card, EmptyState, Field, PageHero, ProductImage, Reveal, StatCard } from '../../components/Common';
 import { money } from '../../utils/helpers';
 
 const steps = [
@@ -34,6 +34,7 @@ export function TrackingPage({ params }) {
           </Card>
 
           {order ? (
+            <Reveal>
             <Card className="mt-6 p-6">
               <div className="flex flex-wrap justify-between gap-4 border-b border-[rgba(201,169,110,.12)] pb-5">
                 <div>
@@ -93,6 +94,7 @@ export function TrackingPage({ params }) {
                 </div>
               </div>
             </Card>
+            </Reveal>
           ) : searched ? (
             <div className="mt-6"><EmptyState title="Order not found">Check the order ID and try again. If you still cannot find your order, contact support with your order number.</EmptyState></div>
           ) : null}

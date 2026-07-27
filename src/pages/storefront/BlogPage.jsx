@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { blogPosts, imageBank } from '../../data/defaultData';
-import { Badge, Button, Card, Field, PageHero } from '../../components/Common';
+import { Badge, Button, Card, Field, PageHero, Reveal } from '../../components/Common';
 
 const extendedPosts = blogPosts.map((post, index) => ({
   ...post,
@@ -99,6 +99,7 @@ export function BlogPage({ navigate, params = {} }) {
 
           <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
             {posts[0] && (
+              <Reveal>
               <Card className="overflow-hidden">
                 <div className="h-96 product-image" style={{ backgroundImage: `url(${posts[0].image})` }} />
                 <div className="p-7">
@@ -108,18 +109,21 @@ export function BlogPage({ navigate, params = {} }) {
                   <Button onClick={() => navigate('blog', { post: posts[0].id })} className="mt-6">Read Article</Button>
                 </div>
               </Card>
+              </Reveal>
             )}
             <div className="grid gap-6">
-              {posts.slice(1).map((post) => (
-                <Card key={post.id} className="grid overflow-hidden md:grid-cols-[180px_1fr]">
-                  <div className="min-h-48 product-image" style={{ backgroundImage: `url(${post.image})` }} />
-                  <div className="p-6">
-                    <Badge>{post.category}</Badge>
-                    <h3 className="mt-3 font-display text-2xl font-bold">{post.title}</h3>
-                    <p className="mt-3 leading-7 text-[#8A7A98]">{post.excerpt}</p>
-                    <button onClick={() => navigate('blog', { post: post.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">Read more →</button>
-                  </div>
-                </Card>
+              {posts.slice(1).map((post, i) => (
+                <Reveal key={post.id} delay={i * 80}>
+                  <Card className="grid overflow-hidden md:grid-cols-[180px_1fr]">
+                    <div className="min-h-48 product-image" style={{ backgroundImage: `url(${post.image})` }} />
+                    <div className="p-6">
+                      <Badge>{post.category}</Badge>
+                      <h3 className="mt-3 font-display text-2xl font-bold">{post.title}</h3>
+                      <p className="mt-3 leading-7 text-[#8A7A98]">{post.excerpt}</p>
+                      <button onClick={() => navigate('blog', { post: post.id })} className="mt-4 text-sm font-bold text-gold hover:text-gold-bright">Read more →</button>
+                    </div>
+                  </Card>
+                </Reveal>
               ))}
             </div>
           </div>

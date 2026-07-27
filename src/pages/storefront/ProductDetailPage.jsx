@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
-import { Badge, Button, Card, EmptyState, PageHero, ProductCard } from '../../components/Common';
+import { Badge, Button, Card, EmptyState, PageHero, ProductCard, Reveal } from '../../components/Common';
 import { WhatsAppOrderButton } from '../../components/WhatsAppButton';
 import { money, safeNumber } from '../../utils/helpers';
 
@@ -103,7 +103,7 @@ export function ProductDetailPage({ navigate, params }) {
                 </button>
               ))}
             </div>
-            <ProductTabContent tab={activeTab} product={product} settings={settings} category={category} />
+            <ProductTabContent tab={activeTab} product={product} settings={settings} category={category} navigate={navigate} />
           </Card>
         </div>
 
@@ -117,7 +117,7 @@ export function ProductDetailPage({ navigate, params }) {
               <Button variant="outline" onClick={() => navigate('shop', { category: product.category })}>Shop {category?.name || product.category}</Button>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {related.map((item) => <ProductCard key={item.id} product={item} navigate={navigate} compact />)}
+              {related.map((item, i) => <Reveal key={item.id} delay={i * 70}><ProductCard product={item} navigate={navigate} compact /></Reveal>)}
             </div>
           </div>
         )}
@@ -126,7 +126,7 @@ export function ProductDetailPage({ navigate, params }) {
   );
 }
 
-function ProductTabContent({ tab, product, settings, category }) {
+function ProductTabContent({ tab, product, settings, category, navigate }) {
   if (tab === 'Details') {
     const details = [
       ['Brand', product.brand],
@@ -142,9 +142,20 @@ function ProductTabContent({ tab, product, settings, category }) {
     return <div className="mt-6 grid gap-4 md:grid-cols-3"><Info title="Delivery" text={`Standard delivery fee is ${money(settings.deliveryFee, settings.currency)} unless the order qualifies for free delivery.`} /><Info title="Processing" text="Orders are checked, packed and confirmed before courier handover." /><Info title="Returns" text="Eligible products can be requested for return through the Returns page after order confirmation." /></div>;
   }
   if (tab === 'Reviews') {
-    return <div className="mt-6 grid gap-4 lg:grid-cols-[260px_1fr]"><Card className="bg-surface-2 p-5"><p className="font-display text-5xl font-bold text-gold">{safeNumber(product.rating, 0).toFixed(1)}</p><p className="mt-1 text-[#C8BAD0]">Average rating</p><p className="mt-2 text-sm text-[#8A7A98]">Based on {product.reviews} customer reviews.</p></Card><div className="space-y-3"><Review name="Verified buyer" text="Beautiful packaging and the product matched the description." /><Review name="GLOWOUT GH customer" text="Delivery update was clear and the quality felt premium." /></div></div>;
+    return (
+      <div className="mt-6 grid gap-4 lg:grid-cols-[260px_1fr]">
+        <Card className="bg-surface-2 p-5">
+          <p className="font-display text-5xl font-bold text-gold">{safeNumber(product.rating, 0).toFixed(1)}</p>
+          <p className="mt-1 text-[#C8BAD0]">Average rating</p>
+          <p className="mt-2 text-sm text-[#8A7A98]">Based on {product.reviews} customer review{product.reviews === 1 ? '' : 's'}.</p>
+        </Card>
+        <Card className="flex flex-col items-start justify-center gap-3 bg-surface-2 p-6">
+          <p className="text-[#8A7A98]">{product.reviews > 0 ? 'Read what customers are saying about products across the store.' : 'No written reviews yet for this product.'}</p>
+          <Button variant="outline" onClick={() => navigate('reviews')}>View Customer Reviews</Button>
+        </Card>
+      </div>
+    );
   }
   return <div className="mt-6 grid gap-4 md:grid-cols-3"><Info title="Why customers choose it" text={product.description} /><Info title="Best for" text="Customers looking for a premium beauty essential with clean product information and reliable fulfilment." /><Info title="Care note" text="Store products away from heat, moisture and direct sunlight where applicable." /></div>;
 }
 function Info({ title, text }) { return <div className="rounded-xl bg-surface-2 p-5"><h4 className="font-display text-xl font-bold">{title}</h4><p className="mt-2 leading-7 text-[#8A7A98]">{text}</p></div>; }
-function Review({ name, text }) { return <div className="rounded-xl border border-[rgba(201,169,110,.12)] bg-surface-2 p-4"><p className="font-bold text-white">{name} · ★★★★★</p><p className="mt-2 text-[#8A7A98]">{text}</p></div>; }

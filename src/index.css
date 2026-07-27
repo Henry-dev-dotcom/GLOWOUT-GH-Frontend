@@ -47,9 +47,9 @@ body::after {
   .field { @apply w-full rounded-xl border border-[rgba(201,169,110,.12)] bg-surface-2 px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#564869] focus:border-gold/60 focus:bg-surface-3; }
   .label { @apply mb-2 block text-xs font-bold uppercase tracking-[.14em] text-[#8A7A98]; }
   .section-eyebrow { @apply text-xs font-bold uppercase tracking-[.22em] text-gold; }
-  .heading-xl { @apply font-display text-4xl font-bold leading-tight md:text-6xl; }
-  .heading-lg { @apply font-display text-3xl font-bold leading-tight md:text-5xl; }
-  .heading-md { @apply font-display text-2xl font-bold leading-tight md:text-3xl; }
+  .heading-xl { @apply font-display text-4xl font-bold leading-tight tracking-tight md:text-6xl; text-wrap: balance; }
+  .heading-lg { @apply font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl; text-wrap: balance; }
+  .heading-md { @apply font-display text-2xl font-bold leading-tight md:text-3xl; text-wrap: balance; }
   .muted { @apply text-[#8A7A98]; }
   .soft { @apply text-[#C8BAD0]; }
   .badge { @apply inline-flex items-center rounded-full border border-[rgba(201,169,110,.24)] bg-gold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-gold; }

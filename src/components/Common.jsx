@@ -1,6 +1,38 @@
+import { useEffect, useRef, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { money, statusClass } from '../utils/helpers';
 import { useStore } from '../context/StoreContext';
+
+export function Reveal({ children, className = '', delay = 0, as = 'div', style = {}, ...props }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const Tag = as;
+  return (
+    <Tag
+      ref={ref}
+      className={`transition-[opacity,transform] duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} ${className}`}
+      style={{ ...style, transitionDelay: visible ? `${delay}ms` : '0ms' }}
+      {...props}
+    >
+      {children}
+    </Tag>
+  );
+}
 
 export function Button({ children, variant = 'gold', className = '', ...props }) {
   const styles = variant === 'gold' ? 'btn btn-gold' : variant === 'outline' ? 'btn btn-outline' : variant === 'danger' ? 'btn btn-danger' : 'btn btn-ghost';

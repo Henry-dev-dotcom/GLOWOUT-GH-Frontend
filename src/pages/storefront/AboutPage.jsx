@@ -1,6 +1,7 @@
+import { CheckCircle2 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { imageBank } from '../../data/defaultData';
-import { Button, Card, PageHero, StatCard } from '../../components/Common';
+import { Button, Card, PageHero, Reveal, StatCard } from '../../components/Common';
 
 const values = [
   ['Authenticity first', 'Every product is sourced from trusted suppliers, with clear details, pricing and stock information on every product page.'],
@@ -63,12 +64,14 @@ export function AboutPage({ navigate }) {
             <h2 className="heading-md mt-3">What every section of the store should communicate.</h2>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {values.map(([title, body]) => (
-              <Card key={title} className="p-7">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gold/10 text-2xl text-gold">✦</div>
-                <h3 className="font-display text-2xl font-bold text-gold">{title}</h3>
-                <p className="mt-4 leading-8 text-[#8A7A98]">{body}</p>
-              </Card>
+            {values.map(([title, body], i) => (
+              <Reveal key={title} delay={i * 80}>
+                <Card className="p-7 transition hover:-translate-y-1 hover:border-gold/30">
+                  <span className="font-display text-4xl font-bold text-gold/30">{String(i + 1).padStart(2, '0')}</span>
+                  <h3 className="mt-4 font-display text-2xl font-bold text-gold">{title}</h3>
+                  <p className="mt-4 leading-8 text-[#8A7A98]">{body}</p>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -82,7 +85,7 @@ export function AboutPage({ navigate }) {
             <div className="mt-6 space-y-4">
               {promises.map((promise) => (
                 <div key={promise} className="flex gap-3 rounded-2xl border border-[rgba(201,169,110,.12)] bg-surface-2/60 p-4">
-                  <span className="mt-1 text-gold">✓</span>
+                  <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-gold" strokeWidth={1.5} />
                   <p className="leading-7 text-[#C8BAD0]">{promise}</p>
                 </div>
               ))}

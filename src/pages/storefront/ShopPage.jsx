@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Badge, Button, Card, EmptyState, Field, PageHero, ProductCard, ProductImage, SelectField } from '../../components/Common';
+import { Badge, Button, Card, EmptyState, Field, PageHero, ProductCard, ProductImage, Reveal, SelectField } from '../../components/Common';
 import { money, safeNumber } from '../../utils/helpers';
 
 const PAGE_SIZE = 6;
@@ -128,13 +128,13 @@ export function ShopPage({ navigate, params }) {
             {visibleProducts.length ? (
               <>
                 <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {visibleProducts.map((product) => (
-                    <div key={product.id} className="relative">
+                  {visibleProducts.map((product, i) => (
+                    <Reveal key={product.id} delay={Math.min(i, 5) * 50} className="relative">
                       <ProductCard product={product} navigate={navigate} />
                       <button onClick={() => setQuickView(product)} className="absolute right-4 top-4 rounded-full border border-gold/30 bg-ink/70 px-3 py-1 text-xs font-bold text-gold backdrop-blur hover:bg-gold hover:text-ink">
                         Quick View
                       </button>
-                    </div>
+                    </Reveal>
                   ))}
                 </div>
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
